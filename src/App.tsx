@@ -1,4 +1,5 @@
 import './App.css'
+import ChatBox from './components/ChatBox';
 import Discription from './components/Discription'
 import RecButton from './components/RecButton';
 import Title from './components/Title'
@@ -18,6 +19,10 @@ function App() {
       <Title title={title}/>
       <Discription discription={discription}/>
       <RecButton />
+      <ChatBox chat={[
+        "ずんだもん: こんにちは！",
+        "ずんだもん: 何か質問ある？",
+      ]} />
     </div>
   )
 }

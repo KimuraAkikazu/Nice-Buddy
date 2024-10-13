@@ -1,4 +1,9 @@
 import React, { useRef, useState } from 'react';
+import { Box, Button } from '@mui/material';
+
+interface ScreenShotButtonProps {
+    onScreenshotCapture: (screenshot: string) => void; // 画像データを渡すコールバック
+}
 
 const ScreenShotButton: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null); // Video要素への参照
@@ -8,13 +13,16 @@ const ScreenShotButton: React.FC = () => {
 
   // 画面キャプチャを開始する関数
   const startCapture = async () => {
+        console.log('startCapture');
     try {
+            console.log('try');
       const captureStream = await navigator.mediaDevices.getDisplayMedia({
         video: { cursor: 'always' } as any,
         audio: false,
       });
 
       if (videoRef.current) {
+                console.log('videoRef');
         videoRef.current.srcObject = captureStream;
 
         // Videoストリームの解像度を取得してCanvasに反映
@@ -28,6 +36,7 @@ const ScreenShotButton: React.FC = () => {
         }
 
         setIsCapturing(true);
+                console.log('timeoutの前');
         setTimeout(() => {
           takeScreenshot(captureStream); // captureStreamを直接渡す
         }, 1000); //なるべく最短で
@@ -39,6 +48,7 @@ const ScreenShotButton: React.FC = () => {
 
   // スクリーンショットを撮る関数
   const takeScreenshot = (captureStream: MediaStream) => {
+        console.log('takeScreenshot');
     if (canvasRef.current && videoRef.current) {
       const canvas = canvasRef.current;
       const video = videoRef.current;
@@ -55,34 +65,34 @@ const ScreenShotButton: React.FC = () => {
       const tracks = captureStream.getTracks();
       tracks.forEach((track) => track.stop()); // すべてのトラックを停止
       setIsCapturing(false); // キャプチャ状態を終了
+            console.log('キャプチャ終了');
     }
   };
 
   // 画像をダウンロードする関数
-  const downloadImage = () => {
-    if (imageData) {
-      const link = document.createElement('a');
-      link.href = imageData;
-      link.download = 'screenshot.png';
-      link.click();
-    }
-  };
+    //   const downloadImage = () => {
+    //     if (imageData) {
+    //       const link = document.createElement('a');
+    //       link.href = imageData;
+    //       link.download = 'screenshot.png';
+    //       link.click();
+    //     }
+    //   };
 
   return (
-    <div>
-      <h1>Screen Capture Example</h1>
+        <Box>
       {isCapturing && <p>画面キャプチャ中...</p>}
-      <button onClick={startCapture} disabled={isCapturing}>
-        画面をキャプチャ
-      </button>
-      <button onClick={() => takeScreenshot} disabled={!isCapturing}>
+            <Button variant="contained" onClick={startCapture} disabled={isCapturing}>
+                スクリーンショットを撮る
+            </Button>
+            {/* <button onClick={() => takeScreenshot} disabled={!isCapturing}>
         スクリーンショットを撮る
       </button>
       <button onClick={downloadImage} disabled={!imageData}>
         スクリーンショットをダウンロード
-      </button>
+      </button> */}
 
-      <div style={{ display: 'none' }}>
+            {/* <div style={{ display: 'none' }}>
         <video ref={videoRef} autoPlay style={{ display: 'none' }}></video>
         <canvas ref={canvasRef}></canvas>
       </div>
@@ -92,8 +102,8 @@ const ScreenShotButton: React.FC = () => {
           <h3>スクリーンショット:</h3>
           <img src={imageData} alt="Screenshot" />
         </div>
-      )}
-    </div>
+      )} */}
+        </Box>
   );
 };
 

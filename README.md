@@ -1,50 +1,49 @@
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+# 環境構築方法
+まずはこのリポジトリをcloneする。
 ```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+git clone リポジトリのURL
 ```
+## フロントエンド
+1. プロジェクトのルートディレクトリにいる状態で以下のコマンドを入力し、node_moduleをインストールする。
+
+    ```
+    npm install
+    ```
+
+2. サーバーを起動
+
+    ```
+    npm run dev
+    ```
+
+## バックエンド
+0. backendディレクトリ(./backend)に移動
+1. pythonのバージョンを合わせる
+    - mac: https://qiita.com/shott/items/7c4e1b7c5fb53805685d
+    - windowns: 後で書きます
+2. 仮想環境を作成（.venvのところは好きなように命名）
+
+    ```
+    python3 -m venv .venv
+    ```
+
+3. 仮想環境を起動（.venvのところは2で命名したもの）
+
+    - Mac, Linuxの場合
+      ```
+      source .venv/bin/activate
+      ```
+
+    - Windowsの場合
+      ```
+      source .venv/Scripts/activate
+      ```
+
+4. pythonモジュールをインストール
+
+    ```
+    pip install -r requirements.txt
+    ```
+
+5. サーバー起動
+    - Flask or FastAPI 決まり次第追記

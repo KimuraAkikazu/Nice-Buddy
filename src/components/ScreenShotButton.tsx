@@ -16,10 +16,21 @@ const ScreenShotButton: React.FC = () => {
 
       if (videoRef.current) {
         videoRef.current.srcObject = captureStream;
+
+        // Videoストリームの解像度を取得してCanvasに反映
+        const videoTrack = captureStream.getVideoTracks()[0];
+        const settings = videoTrack.getSettings();
+
+        if (canvasRef.current) {
+          // Canvasのサイズをビデオストリームの解像度に合わせる
+          canvasRef.current.width = settings.width || 1920; // デフォルト幅（例: 1920）
+          canvasRef.current.height = settings.height || 1080; // デフォルト高さ（例: 1080）
+        }
+
         setIsCapturing(true);
         setTimeout(() => {
           takeScreenshot(captureStream); // captureStreamを直接渡す
-        }, 100); //なるべく最短で
+        }, 1000); //なるべく最短で
       }
     } catch (err) {
       console.error('Error starting capture:', err);
@@ -44,7 +55,6 @@ const ScreenShotButton: React.FC = () => {
       const tracks = captureStream.getTracks();
       tracks.forEach((track) => track.stop()); // すべてのトラックを停止
       setIsCapturing(false); // キャプチャ状態を終了
-      console.log('Screen capture ended.');
     }
   };
 
@@ -74,7 +84,7 @@ const ScreenShotButton: React.FC = () => {
 
       <div style={{ display: 'none' }}>
         <video ref={videoRef} autoPlay style={{ display: 'none' }}></video>
-        <canvas ref={canvasRef} width={800} height={600}></canvas>
+        <canvas ref={canvasRef}></canvas>
       </div>
 
       {imageData && (

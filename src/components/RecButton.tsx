@@ -1,7 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Button, Box } from '@mui/material';
 
-const RecButton: React.FC = () => {
+interface RecButtonProps {
+  onAudioStop: (audioBlob: Blob) => void; // 録音データを渡すコールバック
+}
+
+const RecButton: React.FC<RecButtonProps> = ({ onAudioStop }) => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -20,8 +24,8 @@ const RecButton: React.FC = () => {
 
     mediaRecorder.onstop = () => {
       const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
-      saveAudioFile(audioBlob); // ファイルとして保存
-      audioChunks.current = []; // チャンクをリセット
+      onAudioStop(audioBlob); // 親コンポーネントに音声データを渡す
+      audioChunks.current = [];
     };
 
     mediaRecorder.start();
@@ -32,18 +36,6 @@ const RecButton: React.FC = () => {
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
     setIsRecording(false);
-  };
-
-  // 録音データをWAVファイルとして保存
-  const saveAudioFile = (audioBlob: Blob) => {
-    const a = document.createElement('a');
-    const url = URL.createObjectURL(audioBlob);
-    a.href = url;
-    a.download = 'recording.wav';  // ファイル名を指定
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   return (

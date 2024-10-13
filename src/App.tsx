@@ -1,9 +1,8 @@
 import './App.css'
 import ChatBox from './components/ChatBox';
 import Discription from './components/Discription'
-import RecButton from './components/RecButton';
 import Title from './components/Title'
-import ScreenShotButton from './components/ScreenShotButton'
+import UploadDataButton from './components/UploadDataButton';
 
 function App() {
   // タイトルの内容
@@ -19,8 +18,7 @@ function App() {
     <div>
       <Title title={title}/>
       <Discription discription={discription}/>
-      <RecButton />
-      <ScreenShotButton />
+      <UploadDataButton />
       <ChatBox chat={[
         "ずんだもん: こんにちは！",
         "ずんだもん: 何か質問ある？",

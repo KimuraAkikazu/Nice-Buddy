@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Button, Container } from '@mui/material';
+import { Button, Box } from '@mui/material';
 
 const RecButton: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -47,14 +47,14 @@ const RecButton: React.FC = () => {
   };
 
   return (
-    <Container>
+    <Box sx={{ marginBottom: '32px'}}>
       <Button
         variant="contained"
         onClick={isRecording ? stopRecording : startRecording}
       >
         {isRecording ? '録音停止' : '録音開始'}
       </Button>
-    </Container>
+    </Box>
   );
 };
 

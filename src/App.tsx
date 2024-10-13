@@ -1,5 +1,6 @@
 import './App.css'
 import Discription from './components/Discription'
+import RecButton from './components/RecButton';
 import Title from './components/Title'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
     <div>
       <Title title={title}/>
       <Discription discription={discription}/>
+      <RecButton />
     </div>
   )
 }

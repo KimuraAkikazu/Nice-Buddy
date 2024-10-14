@@ -6,6 +6,7 @@ const AudioInput: React.FC = () => {
 
     const toggleListening = () => {
         setIsListening(!isListening);
+        // 音声認識の処理をここに追加
     };
 
     // グラデーションアニメーションを定義

@@ -9,13 +9,34 @@ export default function ChatBox({ chat }: { chat: string[] }) {
                 </Typography>
             </Box>
             {chat.map((chat, index) => (
-                <Typography key={index} variant="body1" sx={{display: 'flex', justifyContent: 'flex-start', margin: '0 16px'}}>
-                    {chat}
-                </Typography>
+                <Box 
+                    key={index}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        margin: '8px 16px',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            padding: '8px 16px',
+                            backgroundColor: '#f1f0f0',
+                            borderRadius: '15px 15px 15px 0', // 吹き出しの形状
+                            maxWidth: '80%', // 幅を制限
+                            wordWrap: 'break-word',
+                            boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
+                        }}
+                    >
+                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                            {chat}
+                        </Typography>
+                    </Box>
+                </Box>
             ))}
         </Box>
     );
 }
+
 
 /*
     <Typography key={index} variant="body1" sx={{ whiteSpace: 'pre-line' }}>

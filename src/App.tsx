@@ -1,34 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import ChatBox from './components/ChatBox';
+import Discription from './components/Description'
+import Title from './components/Title'
+import UploadDataButton from './components/UploadDataButton';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // タイトルの内容
+  const title = "教えてずんだもん";
+
+  // 説明文の内容
+  const description = [
+    `ずんだもんが会話形式で質問に答えるアプリです。`,
+    ``,
+  ];
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <Title title={title}/>
+      <Discription description={description}/>
+      <UploadDataButton />
+      <ChatBox chat={[
+        "ずんだもん: こんにちは！",
+        "ずんだもん: 何か質問ある？",
+      ]} />
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
 import './App.css'
 import ChatBox from './components/ChatBox';
-import Discription from './components/Discription'
+import Discription from './components/Description'
 import Title from './components/Title'
 import UploadDataButton from './components/UploadDataButton';
 
@@ -9,7 +9,7 @@ function App() {
   const title = "教えてずんだもん";
 
   // 説明文の内容
-  const discription = [
+  const description = [
     `ずんだもんが会話形式で質問に答えるアプリです。`,
     ``,
   ];
@@ -17,7 +17,7 @@ function App() {
   return (
     <div>
       <Title title={title}/>
-      <Discription discription={discription}/>
+      <Discription description={description}/>
       <UploadDataButton />
       <ChatBox chat={[
         "ずんだもん: こんにちは！",

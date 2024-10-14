@@ -1,11 +1,11 @@
 import { Box, Typography } from "@mui/material";
 
-export default function Discription({ discription }: { discription: string[] }) {
+export default function Description({ description }: { description: string[] }) {
     return (
         <Box sx={{ margin: '0 10% 16px 10%'}}>
-            {discription.map((discription, index) => (
+            {description.map((description, index) => (
                 <Typography key={index} variant="body1">
-                    {discription}
+                    {description}
                 </Typography>
             ))}
         </Box>

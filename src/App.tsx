@@ -1,6 +1,7 @@
 import './App.css'
+import { Box } from '@mui/material'
 import ChatBox from './components/ChatBox';
-import Discription from './components/Description'
+import Description from './components/Description'
 import Title from './components/Title'
 import UploadDataButton from './components/UploadDataButton';
 
@@ -15,15 +16,15 @@ function App() {
   ];
 
   return (
-    <div>
+    <Box>
       <Title title={title}/>
-      <Discription description={description}/>
+      <Description description={description}/>
       <UploadDataButton />
       <ChatBox chat={[
         "ずんだもん: こんにちは！",
         "ずんだもん: 何か質問ある？",
       ]} />
-    </div>
+    </Box>
   )
 }
 

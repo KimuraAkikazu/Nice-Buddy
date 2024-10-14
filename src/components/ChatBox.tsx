@@ -43,7 +43,7 @@ export default function ChatBox({ chat }: { chat: string[] }) {
                             padding: '8px 16px',
                             backgroundColor: '#f1f0f0',
                             borderRadius: '15px 15px 15px 0', // 吹き出しの形状
-                            maxWidth: '60%', // 幅を制限
+                            maxWidth: '80%', // 幅を制限
                             wordWrap: 'break-word',
                             boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
                         }}

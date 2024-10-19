@@ -29,7 +29,7 @@ const UploadDataButton: React.FC = () => {
 
     try {
       // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch(Endpoints.ChatApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ const UploadDataButton: React.FC = () => {
 
       const answer = data.choices[0]?.message?.content || '回答がありません';
       console.log('回答:', answer);
-      
+
     } catch (error) {
       console.error('APIの呼び出し中にエラーが発生しました:', error);
     }

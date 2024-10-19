@@ -5,7 +5,11 @@ import SpeechRecognition, {
     useSpeechRecognition,
 } from "react-speech-recognition";
 
-const AudioInput: React.FC = () => {
+interface AudioInputProps {
+    callbackSpeechResult: (message: string) => void; // 音声認識結果を渡すコールバック
+}
+
+const AudioInput: React.FC<AudioInputProps> = ({callbackSpeechResult}) => {
     const {
         // listening,
         transcript,
@@ -23,7 +27,8 @@ const AudioInput: React.FC = () => {
         } else {
             // 喋り終えてすぐだと認識されないことがあるので、少し待ってから処理を実行してもいいかも。要検討
             SpeechRecognition.stopListening();
-            setMessage(transcript);
+            setMessage(transcript); // テスト用
+            callbackSpeechResult(transcript); // 認識結果を親コンポーネントに渡す
             resetTranscript();
         }
     };

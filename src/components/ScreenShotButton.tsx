@@ -60,7 +60,8 @@ const ScreenShotButton: React.FC<ScreenShotButtonProps> = ({ onScreenshotCapture
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 // Base64形式の画像データを取得
                 const image = canvas.toDataURL('image/png');
-                onScreenshotCapture(image); // 親コンポーネントにスクリーンショットを渡す
+                const base64Image = image.split(',')[1]; // プレフィックスを除去
+                onScreenshotCapture(base64Image); // 親コンポーネントにスクリーンショットを渡す
             }
 
             // スクリーンショットを撮った後、画面共有を終了

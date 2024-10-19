@@ -1,5 +1,5 @@
 const Endpoints = {
-    SendImageAndTextBaseUrl: 'http://000.0.0.0:0000/SampleData', // スクショとテキストをバックエンドに送信
+    ChatApiUrl: 'http://127.0.0.1:8000/chat', // スクショとテキストをバックエンドに送信
   };
   
 export default Endpoints;

@@ -1,12 +1,31 @@
 import React, { useState } from 'react';
 import { Box, Button, keyframes } from '@mui/material';
+import 'regenerator-runtime/runtime';
+import SpeechRecognition, {
+    useSpeechRecognition,
+} from "react-speech-recognition";
 
 const AudioInput: React.FC = () => {
+    const {
+        // listening,
+        transcript,
+        resetTranscript,
+        // browserSupportsSpeechRecognition,
+    } = useSpeechRecognition();
+    const [message, setMessage] = useState("");
     const [isListening, setIsListening] = useState(false);
 
     const toggleListening = () => {
         setIsListening(!isListening);
         // 音声認識の処理をここに追加
+        if (!isListening) {
+            SpeechRecognition.startListening();
+        } else {
+            // 喋り終えてすぐだと認識されないことがあるので、少し待ってから処理を実行してもいいかも。要検討
+            SpeechRecognition.stopListening();
+            setMessage(transcript);
+            resetTranscript();
+        }
     };
 
     // グラデーションアニメーションを定義
@@ -56,6 +75,11 @@ const AudioInput: React.FC = () => {
             >
                 {isListening ? "Listening..." : "Click to Start"}
             </Button>
+            {/* この下テスト用 */}
+            <Box sx={{
+                marginLeft: '16px',
+                fontSize: '16px',
+            }}> {message} </Box>
         </Box>
     );
 }

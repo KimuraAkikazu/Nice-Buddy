@@ -1,5 +1,6 @@
 import { Typography, Box } from "@mui/material";
 import { useEffect, useRef } from "react";
+import ReactMarkdown from 'react-markdown';
 
 export default function ChatBox({ chat }: { chat: string[] }) {
     const chatBoxRef = useRef<HTMLDivElement>(null);
@@ -49,7 +50,9 @@ export default function ChatBox({ chat }: { chat: string[] }) {
                         }}
                     >
                         <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                            {chat}
+                            <ReactMarkdown>
+                                {chat}
+                            </ReactMarkdown>
                         </Typography>
                     </Box>
                 </Box>

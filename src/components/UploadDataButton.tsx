@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { Button, Box } from '@mui/material';
+import { Button, Box, TextField } from '@mui/material';
 import ScreenShotButton from './ScreenShotButton'; // スクリーンショットを撮るコンポーネント
 import Endpoints from '../config/Endpoints';
 import AudioInput from './AudioInput';
 
-const UploadDataButton: React.FC = () => {
+interface UploadDataButtonProps {
+  callbackUploadResult: (message: string) => void; // chatapiの結果を渡すコールバック
+}
+
+const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult}) => {
   const [speechText, setSpeechText] = useState<string | null>(null);
   const [imageData, setImageData] = useState<string | null>(null);
+  const [maxTokens, setMaxTokens] = useState<number>(100);
 
   // 録音停止時にファイルを保存するためのコールバック
   const handleAudioStop = (text: string) => {
@@ -22,11 +27,6 @@ const UploadDataButton: React.FC = () => {
 
   // APIに音声ファイルと画像を送信する関数
   const uploadData = async () => {
-    if (!speechText || !imageData) {
-      alert('音声ファイルまたはスクリーンショットがありません');
-      return;
-    }
-
     try {
       // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
       const response = await fetch(Endpoints.ChatApiUrl, {
@@ -37,7 +37,7 @@ const UploadDataButton: React.FC = () => {
         body: JSON.stringify({
           input_text: speechText,     // 必須
           base64_image: imageData,    // オプショナル
-          max_tokens: 100             // 必須
+          max_tokens: maxTokens            // 必須
         }),
       });
 
@@ -50,6 +50,7 @@ const UploadDataButton: React.FC = () => {
 
       const answer = data.choices[0]?.message?.content || '回答がありません';
       console.log('回答:', answer);
+      callbackUploadResult(answer); // 親コンポーネントに回答を渡す
 
     } catch (error) {
       console.error('APIの呼び出し中にエラーが発生しました:', error);
@@ -64,14 +65,19 @@ const UploadDataButton: React.FC = () => {
       {/* 録音をするコンポーネント */}
       <AudioInput callbackSpeechResult={handleAudioStop} />
 
+      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+      <TextField id='outlined-basic' label='最大トークン数' variant='outlined' type='number' value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} sx={{ margin: '16px', width: '128px'}}/>
+
       {/* 音声ファイルと画像データが揃っている場合にAPIへアップロード */}
       <Button
         variant="contained"
         onClick={uploadData}
-        disabled={!speechText || !imageData}
+        disabled={!speechText}
+        sx={{ margin: '16px' }}
       >
         データをアップロード
       </Button>
+      </Box>
     </Box>
   );
 };

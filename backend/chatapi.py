@@ -43,6 +43,10 @@ def chatapi(input_text, base64_image = None, max_tokens = 300):
             model="gpt-4o-mini",
             messages=[
                 {
+                    "role": "system",
+                    "content": "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。回答は口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「ここからテキスト説明部分に変わります」という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、という旨を口頭で説明する部分に入れてください。",
+                },
+                {
                     "role": "user",
                     "content": [
                         {"type": "text", "text": input_text},  # ここに質問を書く
@@ -50,7 +54,7 @@ def chatapi(input_text, base64_image = None, max_tokens = 300):
                     ],
                 }
             ],
-            max_tokens=300,
+            max_tokens=max_tokens,
         )
     
     # print(response)
@@ -64,6 +68,20 @@ image_path = "image/codeimage.png"
 base64_image = encode_image(image_path)
 
 # チャットの応答を生成する
-# response = chatapi("この画面の下の方に映っているエラーの原因を教えて下さい。", base64_image)
+response = chatapi("この画面の下の方に映っているエラーの原因を教えて下さい。", base64_image, 1000)
+answer = response.choices[0].message.content
+print(answer)
 
-# print(response)
+# 区切り文字列
+separator = "ここからテキスト説明部分に変わります"
+
+# 区切り文字で分割
+if separator in answer:
+    speech_part, text_part = answer.split(separator, 1)
+else:
+    speech_part, text_part = answer, ""  # 区切りがない場合
+    
+print("Speech Part:")
+print(speech_part.strip())  # 前後の空白を削除して整形
+print("\nText Part:")
+print(text_part.strip())

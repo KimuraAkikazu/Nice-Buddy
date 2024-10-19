@@ -25,6 +25,7 @@ def chatapi(input_text, base64_image = None, max_tokens = 300):
     
     if (base64_image == None):
         # チャットの応答を生成する
+        # print("テキストだけでapiを叩きます")
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -37,6 +38,7 @@ def chatapi(input_text, base64_image = None, max_tokens = 300):
         )
     else:
         # チャットの応答を生成する
+        # print("テキスト+画像でapiを叩きます")
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -51,7 +53,8 @@ def chatapi(input_text, base64_image = None, max_tokens = 300):
             max_tokens=300,
         )
     
-    return response.choices[0]
+    # print(response)
+    return response
 
 
 # 画像のパス

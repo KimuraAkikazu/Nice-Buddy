@@ -2,9 +2,6 @@ import base64
 from dotenv import load_dotenv
 from openai import OpenAI
 import os
-import sys
-print(sys.executable)
-
 
 load_dotenv()
 
@@ -20,6 +17,13 @@ def encode_image(image_path):
 def chatapi(input_messages, base64_image = None, max_tokens = 300):
     # テスト用
     print("バックエンドで受け取ったinput_messages:", input_messages)
+    
+    # 新しいメッセージを先頭に追加
+    system_message = {
+        "role": "user",
+        "content": "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「ここからテキスト説明部分に変わります。」という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、という旨を口頭で説明する部分に入れてください。"
+    }
+    input_messages.insert(0, system_message)
     
     # OpenAI APIのクライアントを作成する.
     client = OpenAI(

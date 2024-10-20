@@ -23,11 +23,12 @@ function App() {
     ['user', 'こんにちは！あなたはカレー作りの名人です。それを踏まえてこれからの回答に答えてください。'],
   ]);
 
-  const handleUploadResult = (speech: string, message: string) => {
+  const handleUploadResult = (speechScript: string, speechBase64: string, answer: string) => {
     // chatAPIの回答をchatに追加
-    setChat((prevChat) => [...prevChat, ['assistant', message]]);
+    if(speechScript) setChat((prevChat) => [...prevChat, ['assistant', speechScript]]);
+    if(answer) setChat((prevChat) => [...prevChat, ['assistant', answer]]);
     // Base64エンコードされたMP3を再生する処理
-    playAudioFromBase64(speech);
+    playAudioFromBase64(speechBase64);
   };
 
   // Base64エンコードされたMP3を再生する関数

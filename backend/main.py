@@ -58,7 +58,7 @@ def use_chatapi(request: ChatRequest):
         # text-to-speechの処理を追加
         speech_part_base64 = text_to_speech_base64(speech_part)
         
-        return {"text_part": text_part, "speech_part": speech_part_base64}
+        return {"text_part": text_part, "speech_part_script": speech_part, "speech_part_base64": speech_part_base64}
     except Exception as e:
         error_message = format_exc()  # 詳細なスタックトレースを取得
         print(f"Error occurred: {error_message}")

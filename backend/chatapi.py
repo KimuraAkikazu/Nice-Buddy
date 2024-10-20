@@ -30,6 +30,10 @@ def chatapi(input_text, base64_image = None, max_tokens = 300):
             model="gpt-4o-mini",
             messages=[
                 {
+                    "role": "system",
+                    "content": "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。回答は口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「ここからテキスト説明部分に変わります」という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、という旨を口頭で説明する部分に入れてください。",
+                },
+                {
                     "role": "user",
                     "content": input_text,
                 }

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Box, Button, keyframes, TextField } from '@mui/material';
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import Endpoints from '../config/Endpoints';
 
 interface AudioInputProps {
-    callbackUploadResult: (speechScript: string, speechBase64: string, message: string) => void; // chatapiの結果を渡すコールバック
+    callbackUploadResult: (speechScript: string, message: string) => void; // chatapiの結果を渡すコールバック
     chat: string[][];
 }
 
@@ -17,6 +17,7 @@ type Message = {
 const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
     const [maxTokens, setMaxTokens] = useState<number>(500);
+    const audioRef = useRef<HTMLAudioElement | null>(null); // 音声再生用のref
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
     const MAX_MESSAGE_LENGTH = 10;
@@ -81,12 +82,32 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
             console.log('APIの呼び出しに成功しました:', data);
 
             const { speech_part_script: speechPartScript, speech_part_base64: speechPartBase64, text_part: textPart } = data;
-            callbackUploadResult(speechPartScript, speechPartBase64.trim(), textPart); // 親コンポーネントに回答を渡す
+            callbackUploadResult(speechPartScript, textPart); // 親コンポーネントに回答を渡す
+            playAudioFromBase64(speechPartBase64.trim());
 
         } catch (error) {
             console.error('APIの呼び出し中にエラーが発生しました:', error);
         }
     };
+
+    const playAudioFromBase64 = (base64Audio: string) => {
+        const binaryString = window.atob(base64Audio);
+        const bytes = new Uint8Array(binaryString.length);
+    
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+    
+        const blob = new Blob([bytes], { type: 'audio/mp3' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+    
+        audioRef.current = audio;
+        audio.play().catch((error) => console.error('音声の再生に失敗しました:', error));
+    
+        // 音声再生終了後に次の音声入力を自動で開始
+        audio.onended = handleStartListening;
+      };
 
     // グラデーションアニメーションの定義
     const gradientAnimation = keyframes`

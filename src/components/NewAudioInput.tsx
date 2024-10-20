@@ -14,7 +14,7 @@ type Message = {
     content: string;
   };
 
-const AudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
+const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
     const [maxTokens, setMaxTokens] = useState<number>(500);
 
@@ -149,4 +149,4 @@ const AudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) =
     );
 };
 
-export default AudioInput;
+export default NewAudioInput;

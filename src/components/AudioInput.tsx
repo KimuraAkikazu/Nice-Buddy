@@ -41,7 +41,7 @@ const AudioInput: React.FC<AudioInputProps> = ({ callbackSpeechResult }) => {
     `;
 
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
             <Button
                 onClick={listening ? handleStopListening : handleStartListening}
                 sx={{
@@ -70,8 +70,16 @@ const AudioInput: React.FC<AudioInputProps> = ({ callbackSpeechResult }) => {
             >
                 {listening ? 'Listening...' : 'Click to Start'}
             </Button>
-            <Box sx={{ marginLeft: '16px', fontSize: '16px' }}>
-                {transcript}
+            <Box sx={{
+                border: '2px solid #000',
+                borderRadius: '8px',
+                padding: '8px',
+                width: '70%',
+                minHeight: '30px',
+                }}>
+                <Box sx={{ fontSize: '16px' }}>
+                    {transcript}
+                </Box>
             </Box>
         </Box>
     );

@@ -5,7 +5,7 @@ import Endpoints from '../config/Endpoints';
 import AudioInput from './AudioInput';
 
 interface UploadDataButtonProps {
-  callbackUploadResult: (message: string) => void; // chatapiの結果を渡すコールバック
+  callbackUploadResult: (speech: string, message: string) => void; // chatapiの結果を渡すコールバック
 }
 
 const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult}) => {
@@ -48,9 +48,10 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
       const data = await response.json();
       console.log('APIの呼び出しに成功しました:', data);
 
-      const answer = data.choices[0]?.message?.content || '回答がありません';
-      console.log('回答:', answer);
-      callbackUploadResult(answer); // 親コンポーネントに回答を渡す
+      const { speech_part: speechPartBase64, text_part: textPart} = data;
+      console.log('speechPartBase64:', speechPartBase64);
+      // なんかうまくいかない。テストデータではtrimしたらうまくいった
+      callbackUploadResult(speechPartBase64.trim(), textPart); // 親コンポーネントに回答を渡す
 
     } catch (error) {
       console.error('APIの呼び出し中にエラーが発生しました:', error);

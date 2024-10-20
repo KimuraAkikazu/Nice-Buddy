@@ -22,16 +22,37 @@ function App() {
     "ずんだもん: こんにちは！",
   ]);
 
-  const handleUploadResult = (message: string) => {
+  const handleUploadResult = (speech: string, message: string) => {
     setChat((prevChat) => [...prevChat, `ずんだもん: ${message}`]);
+    // Base64エンコードされたMP3を再生する処理
+    playAudioFromBase64(speech);
+  };
+
+  // Base64エンコードされたMP3を再生する関数
+  const playAudioFromBase64 = (base64Audio: string) => {
+    // Base64文字列からバイナリデータに変換
+    const binaryString = window.atob(base64Audio);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    const blob = new Blob([bytes], { type: 'audio/mp3' });
+    const url = URL.createObjectURL(blob);
+
+    // Audioオブジェクトを使って音声を再生
+    const audio = new Audio(url);
+    audio.play().catch((error) => console.error('音声の再生に失敗しました:', error));
   };
 
   return (
     <Box>
-      <Title title={title}/>
-      <Description description={description}/>
-      <UploadDataButton callbackUploadResult={handleUploadResult}/>
-      <ChatBox chat={chat}/>
+      <Title title={title} />
+      <Description description={description} />
+      <UploadDataButton callbackUploadResult={handleUploadResult} />
+      <ChatBox chat={chat} />
     </Box>
   )
 }

@@ -9,6 +9,7 @@ from traceback import format_exc
 # 自作関数のインポート
 from chatapi import chatapi
 from devide_response import divide_response
+from text_to_speech_base64 import text_to_speech_base64
 
 
 app = FastAPI()
@@ -52,10 +53,9 @@ def use_chatapi(request: ChatRequest):
         print("text_part:", text_part)
         
         # text-to-speechの処理を追加
+        speech_part_base64 = text_to_speech_base64(speech_part)
         
-        
-        return {"text_part": text_part}
-        # return {"text_part": text_part, "speech_part": speech_part_base64}
+        return {"text_part": text_part, "speech_part": speech_part_base64}
     except Exception as e:
         error_message = format_exc()  # 詳細なスタックトレースを取得
         print(f"Error occurred: {error_message}")

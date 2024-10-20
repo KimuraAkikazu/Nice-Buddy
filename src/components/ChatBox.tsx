@@ -49,11 +49,16 @@ export default function ChatBox({ chat }: { chat: string[] }) {
                             boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
                         }}
                     >
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        {/* <Typography variant="body1" sx={{ textAlign: 'left' }}>
                             <ReactMarkdown>
                                 {chat}
                             </ReactMarkdown>
-                        </Typography>
+                        </Typography> */}
+                        <Box sx={{ textAlign: 'left' }}>
+                        <ReactMarkdown>
+                            {chat}
+                        </ReactMarkdown>
+                        </Box>
                     </Box>
                 </Box>
             ))}

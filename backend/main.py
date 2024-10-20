@@ -2,10 +2,14 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel 
-from chatapi import chatapi
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
 from traceback import format_exc
+
+# 自作関数のインポート
+from chatapi import chatapi
+from devide_response import divide_response
+from text_to_speech_base64 import text_to_speech_base64
 
 
 app = FastAPI()
@@ -42,7 +46,16 @@ def use_chatapi(request: ChatRequest):
             base64_image=request.base64_image, 
             max_tokens=request.max_tokens
         )
-        return response
+        # スピーチ部分とテキスト部分を分ける処理を追加
+        answer = response.choices[0].message.content
+        speech_part, text_part = divide_response(answer)
+        print("speech_part:", speech_part)
+        print("text_part:", text_part)
+        
+        # text-to-speechの処理を追加
+        speech_part_base64 = text_to_speech_base64(speech_part)
+        
+        return {"text_part": text_part, "speech_part": speech_part_base64}
     except Exception as e:
         error_message = format_exc()  # 詳細なスタックトレースを取得
         print(f"Error occurred: {error_message}")

@@ -1,7 +1,7 @@
 import base64
 from dotenv import load_dotenv
 from openai import OpenAI
-import  os
+import os
 import sys
 print(sys.executable)
 

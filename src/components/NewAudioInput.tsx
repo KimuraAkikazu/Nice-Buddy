@@ -12,7 +12,7 @@ interface AudioInputProps {
 type Message = {
     role: string;
     content: string;
-  };
+};
 
 const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
@@ -93,21 +93,21 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const playAudioFromBase64 = (base64Audio: string) => {
         const binaryString = window.atob(base64Audio);
         const bytes = new Uint8Array(binaryString.length);
-    
+
         for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+            bytes[i] = binaryString.charCodeAt(i);
         }
-    
+
         const blob = new Blob([bytes], { type: 'audio/mp3' });
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-    
+
         audioRef.current = audio;
         audio.play().catch((error) => console.error('音声の再生に失敗しました:', error));
-    
+
         // 音声再生終了後に次の音声入力を自動で開始
         audio.onended = handleStartListening;
-      };
+    };
 
     // グラデーションアニメーションの定義
     const gradientAnimation = keyframes`
@@ -124,34 +124,43 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <Button
-                onClick={listening ? handleStopListening : handleStartListening}
-                sx={{
-                    width: '150px',
-                    height: '150px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontSize: '16px',
-                    color: 'white',
-                    backgroundColor: listening ? 'transparent' : '#ccc',
-                    transition: 'background-color 0.3s ease',
-                    outline: 'none',
-                    boxShadow: 'none',
-                    '&:focus': {
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '16px'}}>
+                <Button
+                    onClick={listening ? handleStopListening : handleStartListening}
+                    sx={{
+                        width: '150px',
+                        height: '150px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        fontSize: '16px',
+                        color: 'white',
+                        backgroundColor: listening ? 'transparent' : '#ccc',
+                        transition: 'background-color 0.3s ease',
                         outline: 'none',
-                        boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
-                    },
-                    ...(listening && {
-                        background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
-                        backgroundSize: '400% 400%',
-                        animation: `${gradientAnimation} 3s ease infinite`,
-                    }),
-                }}
-            >
-                {listening ? 'Listening...' : 'Click to Start'}
-            </Button>
+                        boxShadow: 'none',
+                        '&:focus': {
+                            outline: 'none',
+                            boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
+                        },
+                        ...(listening && {
+                            background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
+                            backgroundSize: '400% 400%',
+                            animation: `${gradientAnimation} 3s ease infinite`,
+                        }),
+                    }}
+                >
+                    {listening ? 'Listening...' : 'Click to Start'}
+                </Button>
+                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }
+                }>
+                    <Button variant='contained'>
+                        会話を中断
+                    </Button>
+                    <TextField id='outlined-basic' label='最大トークン数' variant='outlined' type='number' value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} sx={{ margin: '16px', width: '128px' }} />
+                </Box>
+            </Box>
             <Box sx={{
                 border: '2px solid #000',
                 borderRadius: '8px',
@@ -164,7 +173,6 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                     {transcript}
                 </Box>
             </Box>
-      <TextField id='outlined-basic' label='最大トークン数' variant='outlined' type='number' value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} sx={{ margin: '16px', width: '128px'}}/>
 
         </Box>
     );

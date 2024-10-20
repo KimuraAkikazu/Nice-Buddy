@@ -51,7 +51,7 @@ export default function ChatBox({ chat }: { chat: string[][] }) {
                         boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
                     }}
                 >
-                    <Box sx={{ textAlign: message[0] === 'user' ? 'left' : 'right' }}>
+                    <Box sx={{ textAlign: 'left' }}>
                         <ReactMarkdown>
                             {message[1]}
                         </ReactMarkdown>

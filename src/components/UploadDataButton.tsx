@@ -5,18 +5,25 @@ import Endpoints from '../config/Endpoints';
 import AudioInput from './AudioInput';
 
 interface UploadDataButtonProps {
-  callbackUploadResult: (speech: string, message: string) => void; // chatapiの結果を渡すコールバック
+  callbackUploadResult: (speechScript: string ,speechBase64: string, message: string) => void; // chatapiの結果を渡すコールバック
+  chat: string[][];
 }
 
-const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult}) => {
+type Message = {
+  role: string;
+  content: string;
+};
+
+const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult, chat}) => {
   const [speechText, setSpeechText] = useState<string | null>(null);
   const [imageData, setImageData] = useState<string | null>(null);
   const [maxTokens, setMaxTokens] = useState<number>(100);
+  // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
+  const MAX_MESSAGE_LENGTH = 10;
 
   // 録音停止時にファイルを保存するためのコールバック
   const handleAudioStop = (text: string) => {
     setSpeechText(text);
-    console.log('speechTextがセットされました');
   };
 
   // スクリーンショット取得時に画像データを保存するためのコールバック
@@ -25,9 +32,25 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
     console.log('画像がセットされました');
   };
 
+  // チャットデータをAPIに送信する形式に変換する関数
+  const convertToMessageObjects = (input: string[][]): Message[] => {
+    // chatの要素数が10を超えた場合、最後の10個だけ取得
+    const lastTenChats = input.length > MAX_MESSAGE_LENGTH ? input.slice(-MAX_MESSAGE_LENGTH) : input;
+
+    return lastTenChats
+      .filter(arr => arr.length === 2) // 要素数が2のものだけをフィルタリング
+      .map(([role, content]) => ({ role, content }));
+  };
+
   // APIに音声ファイルと画像を送信する関数
   const uploadData = async () => {
     try {
+      chat.push(['user', speechText || '']); // チャットデータに音声認識結果を追加
+      
+      // チャットデータをAPIに送信する形式に変換
+      const chat_converted = convertToMessageObjects(chat);
+      console.log('chat_converted:', chat_converted);
+
       // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
       const response = await fetch(Endpoints.ChatApiUrl, {
         method: 'POST',
@@ -35,7 +58,7 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          input_text: speechText,     // 必須
+          input_messages: chat_converted,     // 必須
           base64_image: imageData,    // オプショナル
           max_tokens: maxTokens            // 必須
         }),
@@ -48,10 +71,8 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
       const data = await response.json();
       console.log('APIの呼び出しに成功しました:', data);
 
-      const { speech_part: speechPartBase64, text_part: textPart} = data;
-      console.log('speechPartBase64:', speechPartBase64);
-      // なんかうまくいかない。テストデータではtrimしたらうまくいった
-      callbackUploadResult(speechPartBase64.trim(), textPart); // 親コンポーネントに回答を渡す
+      const { speech_part_script: speechPartScript, speech_part_base64: speechPartBase64, text_part: textPart} = data;
+      callbackUploadResult(speechPartScript, speechPartBase64.trim(), textPart); // 親コンポーネントに回答を渡す
 
     } catch (error) {
       console.error('APIの呼び出し中にエラーが発生しました:', error);

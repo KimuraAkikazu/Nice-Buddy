@@ -2,7 +2,7 @@ import { Typography, Box } from "@mui/material";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
 
-export default function ChatBox({ chat }: { chat: string[] }) {
+export default function ChatBox({ chat }: { chat: string[][] }) {
     const chatBoxRef = useRef<HTMLDivElement>(null);
 
     // チャットが更新されるたびに一番下までスクロールするための処理
@@ -30,37 +30,34 @@ export default function ChatBox({ chat }: { chat: string[] }) {
                     回答テキスト
                 </Typography>
             </Box>
-            {chat.map((chat, index) => (
+            {chat.map((message, index) => (
                 <Box 
-                    key={index}
+                key={index}
+                sx={{
+                    display: 'flex',
+                    justifyContent: message[0] === 'user' ? 'flex-end' : 'flex-start', // 吹き出しの配置を切り替え
+                    margin: '8px 16px',
+                }}
+            >
+                <Box
                     sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        margin: '8px 16px',
+                        padding: '8px 16px',
+                        backgroundColor: message[0] === 'user' ? '#f1f0f0' : '#e0f7fa', // 配色を変更
+                        borderRadius: message[0] === 'user' 
+                            ? '15px 15px 0 15px' 
+                            : '15px 15px 15px 0', // 吹き出しの形状を変える
+                        maxWidth: '80%', // 幅を制限
+                        wordWrap: 'break-word',
+                        boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
                     }}
                 >
-                    <Box
-                        sx={{
-                            padding: '8px 16px',
-                            backgroundColor: '#f1f0f0',
-                            borderRadius: '15px 15px 15px 0', // 吹き出しの形状
-                            maxWidth: '80%', // 幅を制限
-                            wordWrap: 'break-word',
-                            boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
-                        }}
-                    >
-                        {/* <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                            <ReactMarkdown>
-                                {chat}
-                            </ReactMarkdown>
-                        </Typography> */}
-                        <Box sx={{ textAlign: 'left' }}>
+                    <Box sx={{ textAlign: 'left' }}>
                         <ReactMarkdown>
-                            {chat}
+                            {message[1]}
                         </ReactMarkdown>
-                        </Box>
                     </Box>
                 </Box>
+            </Box>
             ))}
         </Box>
     );

@@ -24,10 +24,6 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
   // 録音停止時にファイルを保存するためのコールバック
   const handleAudioStop = (text: string) => {
     setSpeechText(text);
-    console.log('speechTextがセットされました');
-    chat.push(['user', text]);
-    console.log('chatにspeechTextが追加されました');
-    console.log('chat:', chat);
   };
 
   // スクリーンショット取得時に画像データを保存するためのコールバック
@@ -49,6 +45,8 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
   // APIに音声ファイルと画像を送信する関数
   const uploadData = async () => {
     try {
+      chat.push(['user', speechText || '']); // チャットデータに音声認識結果を追加
+      
       // チャットデータをAPIに送信する形式に変換
       const chat_converted = convertToMessageObjects(chat);
       console.log('chat_converted:', chat_converted);

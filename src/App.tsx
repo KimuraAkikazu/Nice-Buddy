@@ -18,12 +18,14 @@ function App() {
   ];
 
   // chatをstateとして管理
-  const [chat, setChat] = useState<string[]>([
-    "ずんだもん: こんにちは！",
+  const [chat, setChat] = useState<string[][]>([
+    ['assistant', 'こんにちは！なにかお手伝いできることはありますか？'],
+    ['user', 'こんにちは！'],
   ]);
 
   const handleUploadResult = (speech: string, message: string) => {
-    setChat((prevChat) => [...prevChat, `ずんだもん: ${message}`]);
+    // chatAPIの回答をchatに追加
+    setChat((prevChat) => [...prevChat, ['assistant', message]]);
     // Base64エンコードされたMP3を再生する処理
     playAudioFromBase64(speech);
   };

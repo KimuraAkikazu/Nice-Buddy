@@ -6,9 +6,15 @@ import AudioInput from './AudioInput';
 
 interface UploadDataButtonProps {
   callbackUploadResult: (speech: string, message: string) => void; // chatapiの結果を渡すコールバック
+  chat: string[][];
 }
 
-const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult}) => {
+type Message = {
+  role: string;
+  content: string;
+};
+
+const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult, chat}) => {
   const [speechText, setSpeechText] = useState<string | null>(null);
   const [imageData, setImageData] = useState<string | null>(null);
   const [maxTokens, setMaxTokens] = useState<number>(100);
@@ -17,6 +23,9 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
   const handleAudioStop = (text: string) => {
     setSpeechText(text);
     console.log('speechTextがセットされました');
+    chat.push(['user', text]);
+    console.log('chatにspeechTextが追加されました');
+    console.log('chat:', chat);
   };
 
   // スクリーンショット取得時に画像データを保存するためのコールバック
@@ -25,9 +34,20 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
     console.log('画像がセットされました');
   };
 
+  // チャットデータをAPIに送信する形式に変換する関数
+  const convertToMessageObjects = (input: string[][]): Message[] => {
+    return input
+      .filter(arr => arr.length === 2) // 要素数が2のものだけをフィルタリング
+      .map(([role, content]) => ({ role, content }));
+  };
+
   // APIに音声ファイルと画像を送信する関数
   const uploadData = async () => {
     try {
+      // チャットデータをAPIに送信する形式に変換
+      const chat_converted = convertToMessageObjects(chat);
+      console.log('chat_converted:', chat_converted);
+
       // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
       const response = await fetch(Endpoints.ChatApiUrl, {
         method: 'POST',
@@ -35,7 +55,7 @@ const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          input_text: speechText,     // 必須
+          input_messages: chat_converted,     // 必須
           base64_image: imageData,    // オプショナル
           max_tokens: maxTokens            // 必須
         }),

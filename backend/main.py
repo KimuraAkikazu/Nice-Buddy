@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel 
 from starlette.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, List
 from traceback import format_exc
 
 # 自作関数のインポート
@@ -21,10 +21,13 @@ app.add_middleware(
     allow_headers=["*"]       # 追記により追加
 )
 
+class Message(BaseModel):
+    role: str
+    content: str
 
 # リクエストボディのデータ構造を定義
 class ChatRequest(BaseModel):
-    input_text: str
+    input_messages: List[Message]
     base64_image: Optional[str] = None
     max_tokens: int = 300
     
@@ -42,7 +45,7 @@ def use_chatapi(request: ChatRequest):
     try:
         # リクエストボディから値を取得してchatapiに渡す
         response = chatapi(
-            input_text=request.input_text, 
+            input_messages=request.input_messages, 
             base64_image=request.base64_image, 
             max_tokens=request.max_tokens
         )

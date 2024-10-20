@@ -20,7 +20,7 @@ function App() {
   // chatをstateとして管理
   const [chat, setChat] = useState<string[][]>([
     ['assistant', 'こんにちは！なにかお手伝いできることはありますか？'],
-    ['user', 'こんにちは！'],
+    ['user', 'こんにちは！あなたはカレー作りの名人です。それを踏まえてこれからの回答に答えてください。'],
   ]);
 
   const handleUploadResult = (speech: string, message: string) => {
@@ -53,7 +53,7 @@ function App() {
     <Box>
       <Title title={title} />
       <Description description={description} />
-      <UploadDataButton callbackUploadResult={handleUploadResult} />
+      <UploadDataButton callbackUploadResult={handleUploadResult} chat={chat} />
       <ChatBox chat={chat} />
     </Box>
   )

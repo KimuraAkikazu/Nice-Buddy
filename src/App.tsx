@@ -20,8 +20,6 @@ function App() {
 
   // chatをstateとして管理
   const [chat, setChat] = useState<string[][]>([
-    ['assistant', 'こんにちは！なにかお手伝いできることはありますか？'],
-    ['user', 'こんにちは！あなたはカレー作りの名人です。それを踏まえてこれからの回答に答えてください。'],
   ]);
 
   const handleUploadResult = (speechScript: string, answer: string) => {

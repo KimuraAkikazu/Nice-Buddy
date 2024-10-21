@@ -17,7 +17,7 @@ type Message = {
 const UploadDataButton: React.FC<UploadDataButtonProps> = ({callbackUploadResult, chat}) => {
   const [speechText, setSpeechText] = useState<string | null>(null);
   const [imageData, setImageData] = useState<string | null>(null);
-  const [maxTokens, setMaxTokens] = useState<number>(100);
+  const [maxTokens, setMaxTokens] = useState<number>(500);
   // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
   const MAX_MESSAGE_LENGTH = 10;
 

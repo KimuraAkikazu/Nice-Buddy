@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
 import { Box, Button, keyframes, TextField } from '@mui/material';
-import 'regenerator-runtime/runtime';
+import React, { useEffect, useRef, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import 'regenerator-runtime/runtime';
 import Endpoints from '../config/Endpoints';
 
 interface AudioInputProps {
@@ -122,6 +122,12 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         }
     `;
 
+    // const InterruptListening = () => {
+    //     handleStopListening();  // 音声認識を停止
+    //     resetTranscript();  // 認識された音声内容をリセット
+    //     console.log("会話が中断されました"); // デバッグ用メッセージ
+    // }
+
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: '16px'}}>
@@ -155,7 +161,11 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 </Button>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }
                 }>
-                    <Button variant='contained' sx={{ width: '140px'}}>
+                    <Button
+                        // onClick={InterruptListening}
+                        variant='contained'
+                        sx={{ width: '140px'}}
+                    >
                         会話を中断
                     </Button>
                     <Button variant='contained' sx={{ width: '140px'}}>

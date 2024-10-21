@@ -2,6 +2,7 @@ import base64
 from dotenv import load_dotenv
 from openai import OpenAI
 import os
+from take_screenshot import screenshot
 
 load_dotenv()
 
@@ -15,7 +16,7 @@ def transform_content_for_image(base64_image, messages):
     last_message = messages[-1]
     
     # 元のcontentの値を取得
-    original_content = last_message["content"]
+    original_content = last_message.content
     
     # 新しいcontentの構造
     new_content = [
@@ -32,7 +33,7 @@ def transform_content_for_image(base64_image, messages):
     ]
     
     # 最後のメッセージのcontentを新しいものに置き換える
-    last_message["content"] = new_content
+    last_message.content = new_content
 
     return messages
 
@@ -55,7 +56,7 @@ def chatapi(input_messages, base64_image = None, max_tokens = 300):
     # 新しいメッセージを先頭に追加
     system_message = {
         "role": "user",
-        "content": "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「ここからテキスト説明部分に変わります。」という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、という旨を口頭で説明する部分に入れてください。ユーザーが画面情報を参照して言っているようなら、「code101」というメッセージのみ返してください。"
+        "content": "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「ここからテキスト説明部分に変わります。」という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、という旨を口頭で説明する部分に入れてください。「ユーザーが画面情報を参照して言っている」かつ、「画像が送られてきていない」なら、「code101」というメッセージのみ返してください。"
     }
     input_messages.insert(0, system_message)
     
@@ -75,13 +76,13 @@ def chatapi(input_messages, base64_image = None, max_tokens = 300):
         if is_image_needed(response.choices[0].message.content):
             # 画像が必要な場合の処理を追加
             print("画像が必要です")
-            # screenshot_base64 = ひでの関数
-            # input_messages = transform_content_for_image(screenshot_base64, input_messages)
-            # response = client.chat.completions.create(
-            #     model="gpt-4o-mini",
-            #     messages=input_messages,
-            #     max_tokens=max_tokens,
-            # )   
+            screenshot_base64 = screenshot()
+            input_messages = transform_content_for_image(screenshot_base64, input_messages)
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=input_messages,
+                max_tokens=max_tokens,
+            )   
         
     else:
         # テキストと画像の両方を含む場合

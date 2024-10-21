@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel 
 from starlette.middleware.cors import CORSMiddleware
-from typing import Optional, List
+from typing import Optional, List, Union
 from traceback import format_exc
 
 # 自作関数のインポート
@@ -21,11 +21,25 @@ app.add_middleware(
     allow_headers=["*"]       # 追記により追加
 )
 
+# TextContentモデル
+class TextContent(BaseModel):
+    type: str = "text"
+    text: str
+
+# ImageContentモデル
+class ImageUrl(BaseModel):
+    url: str
+
+class ImageContent(BaseModel):
+    type: str = "image_url"
+    image_url: ImageUrl
+
+# MessageモデルでUnionを使用してリストの要素に対応
 class Message(BaseModel):
     role: str
-    content: str
+    content: Union[str, List[Union[TextContent, ImageContent]]]
 
-# リクエストボディのデータ構造を定義
+# ChatRequestモデル
 class ChatRequest(BaseModel):
     input_messages: List[Message]
     base64_image: Optional[str] = None

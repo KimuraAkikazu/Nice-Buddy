@@ -14,15 +14,25 @@ def encode_image(image_path):
 # input_messages: 過去の履歴も含めたユーザーの入力メッセージ 
 # base64_image: スクショ画像をbase64エンコードしたもの
 # max_tokens: 生成するテキストの最大トークン数
-def chatapi(input_messages, base64_image = None, max_tokens = 300):
+def chatapi(input_messages, language, base64_image = None, max_tokens = 300):
     # テスト用
     print("バックエンドで受け取ったinput_messages:", input_messages)
     
     # 新しいメッセージを先頭に追加
-    system_message = {
-        "role": "user",
-        "content": "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「ここからテキスト説明部分に変わります。」という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、という旨を口頭で説明する部分に入れてください。"
-    }
+    if language == "ja-JP":
+        system_message = {
+            "role": "user",
+            "content": "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「code102」という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、という旨を口頭で説明する部分に入れてください。"
+        }
+    elif language == "en-US":
+        system_message = {
+            "role": "user",
+            "content": "You are an excellent AI assistant. Please respond as concisely, clearly, and accurately as possible. Generally, I would like you to explain things verbally, but if it's better to display certain information (such as source code) as text, divide the verbal explanation and the text explanation with the string 'code102'. Keep the response within ${max_tokens} tokens. Also, include in your verbal explanation a note mentioning that you will provide certain parts as text."
+        }
+    else:
+        print("言語が不正です。")
+        return
+    
     input_messages.insert(0, system_message)
     
     # OpenAI APIのクライアントを作成する.

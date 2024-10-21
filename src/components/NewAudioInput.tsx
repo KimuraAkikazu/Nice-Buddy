@@ -72,6 +72,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 },
                 body: JSON.stringify({
                     input_messages: chat_converted,     // 必須
+                    language: language, // 必須
                     max_tokens: maxTokens            // 必須
                 }),
             });

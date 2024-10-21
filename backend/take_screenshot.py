@@ -15,7 +15,7 @@ def screenshot():
 
     # バイナリデータをbase64にエンコード
     encoded_screenshot = base64.b64encode(binary_screenshot).decode('utf-8')
-    print("encoded_screenshot:", encoded_screenshot)
+    # print("encoded_screenshot:", encoded_screenshot)
 
     # エンコード結果を返す
     return encoded_screenshot

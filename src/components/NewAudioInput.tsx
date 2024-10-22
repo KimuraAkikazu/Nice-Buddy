@@ -3,6 +3,7 @@ import { Box, Button, keyframes, TextField } from '@mui/material';
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import Endpoints from '../config/Endpoints';
+import VoiceSelector from './VoiceSelector';
 
 interface AudioInputProps {
     callbackUploadResult: (speechScript: string, message: string) => void; // chatapiの結果を渡すコールバック
@@ -17,6 +18,7 @@ type Message = {
 const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
     const [maxTokens, setMaxTokens] = useState<number>(500);
+    const [voicemode, setVoicemode] = useState<string>('alloy');
     const audioRef = useRef<HTMLAudioElement | null>(null); // 音声再生用のref
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
@@ -34,6 +36,10 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         if (transcript) {
             uploadData(transcript);
         }
+    };
+
+    const handleVoicemodeChange = (voicemode: string) => {
+        setVoicemode(voicemode);
     };
 
     // 音声認識が停止したら自動的に結果を処理
@@ -69,8 +75,9 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    input_messages: chat_converted,     // 必須
-                    max_tokens: maxTokens            // 必須
+                    input_messages: chat_converted, // 必須
+                    max_tokens: maxTokens, // 必須
+                    voicemode: voicemode // 必須
                 }),
             });
 
@@ -162,6 +169,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                         指定ウインドウのスクショ
                     </Button>
                     <TextField id='outlined-basic' label='最大トークン数' variant='outlined' type='number' value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} sx={{ margin: '16px', width: '128px' }} />
+                    <VoiceSelector callbackVoicemode={handleVoicemodeChange} />
                 </Box>
             </Box>
             <Box sx={{

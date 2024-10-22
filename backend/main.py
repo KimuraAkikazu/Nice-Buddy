@@ -44,6 +44,7 @@ class ChatRequest(BaseModel):
     input_messages: List[Message]
     base64_image: Optional[str] = None
     max_tokens: int = 300
+    voicemode: str
     
 @app.exception_handler(RequestValidationError)
 async def handler(request:Request, exc:RequestValidationError):
@@ -70,7 +71,7 @@ def use_chatapi(request: ChatRequest):
         print("text_part:", text_part)
         
         # text-to-speechの処理を追加
-        speech_part_base64 = text_to_speech_base64(speech_part)
+        speech_part_base64 = text_to_speech_base64(speech_part, voice=request.voicemode)
         
         return {"text_part": text_part, "speech_part_script": speech_part, "speech_part_base64": speech_part_base64}
     except Exception as e:

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Box, Button, keyframes, TextField } from '@mui/material';
 import 'regenerator-runtime/runtime';
@@ -17,21 +18,26 @@ type Message = {
 const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
     const [maxTokens, setMaxTokens] = useState<number>(500);
+    const [isPaused, setIsPaused] = useState<boolean>(false); // 中断状態を管理するフラグ
+    const isPausedRef = useRef(isPaused); // 最新の中断状態を追跡するRef
     const audioRef = useRef<HTMLAudioElement | null>(null); // 音声再生用のref
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
     const MAX_MESSAGE_LENGTH = 10;
 
     const handleStartListening = () => {
-        resetTranscript();
-        SpeechRecognition.startListening({ continuous: false, language: 'ja-JP' });
+        if (!isPausedRef.current) { // 中断状態でないときだけ開始
+            resetTranscript();
+            SpeechRecognition.startListening({ continuous: false, language: 'ja-JP' });
+        }
     };
 
     const handleStopListening = () => {
         SpeechRecognition.stopListening();
 
         //transcriptが空でない場合、音声認識結果をAPIに送信
-        if (transcript) {
+        if (transcript && !isPaused ) {
+            console.log(isPaused);
             uploadData(transcript);
         }
     };
@@ -105,8 +111,14 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         audioRef.current = audio;
         audio.play().catch((error) => console.error('音声の再生に失敗しました:', error));
 
-        // 音声再生終了後に次の音声入力を自動で開始
-        audio.onended = handleStartListening;
+        // 音声再生終了後、中断状態でない場合にのみ次の音声入力を開始
+        audio.onended = async() => {
+            if (!isPausedRef.current) {
+                await resetTranscript();  // 認識された音声内容をリセット
+                console.log(isPaused);
+                handleStartListening();
+            }
+        };
     };
 
     // グラデーションアニメーションの定義
@@ -121,6 +133,12 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
             background-position: 0% 50%;
         }
     `;
+
+    const InterruptListening = () => {
+        setIsPaused(true);  // 中断状態にする
+        resetTranscript();  // 認識された音声内容をリセット
+        console.log("会話が中断されました"); // デバッグ用メッセージ
+    }
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
@@ -155,7 +173,11 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 </Button>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }
                 }>
-                    <Button variant='contained' sx={{ width: '140px'}}>
+                    <Button
+                        onClick={InterruptListening}
+                        variant='contained'
+                        sx={{ width: '140px'}}
+                    >
                         会話を中断
                     </Button>
                     <Button variant='contained' sx={{ width: '140px'}}>

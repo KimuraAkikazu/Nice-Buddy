@@ -1,12 +1,12 @@
 import React from "react";
-import { Box, FormControl, Select, SelectChangeEvent } from "@mui/material";
+import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 
 interface LanguageSelectionButtonProps {
     callbackVoicemode: (voicemode: string) => void;
 }
 
 const VoiceSelector: React.FC<LanguageSelectionButtonProps> = ({ callbackVoicemode }) => {
-    const [voicemode, setVoicemode] = React.useState<string>('text');
+    const [voicemode, setVoicemode] = React.useState<string>('alloy');
 
     const handleChange = (event: SelectChangeEvent) => {
         setVoicemode(event.target.value);
@@ -15,26 +15,24 @@ const VoiceSelector: React.FC<LanguageSelectionButtonProps> = ({ callbackVoicemo
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center' }}>
-            <FormControl>
+            <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+                <InputLabel id="voicemode-label">Voice</InputLabel>
                 <Select
-                    native
+                    labelId="voicemode-label"
                     value={voicemode}
                     onChange={handleChange}
-                    inputProps={{
-                        name: 'voicemode',
-                        id: 'voicemode',
-                    }}
+                    label="Voice"
                 >
-                    <option value={'alloy'}>alloy</option>
-                    <option value={'echo'}>echo</option>
-                    <option value={'fable'}>fable</option>
-                    <option value={'onyx'}>onyx</option>
-                    <option value={'nova'}>nova</option>
-                    <option value={'shimmer'}>shimmer</option>
+                    <MenuItem value={'alloy'}>alloy</MenuItem>
+                    <MenuItem value={'echo'}>echo</MenuItem>
+                    <MenuItem value={'fable'}>fable</MenuItem>
+                    <MenuItem value={'onyx'}>onyx</MenuItem>
+                    <MenuItem value={'nova'}>nova</MenuItem>
+                    <MenuItem value={'shimmer'}>shimmer</MenuItem>
                 </Select>
             </FormControl>
         </Box>
     );
-}
+};
 
 export default VoiceSelector;

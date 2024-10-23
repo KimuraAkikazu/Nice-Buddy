@@ -52,26 +52,49 @@ def is_image_needed(answer: str):
 # input_messages: 過去の履歴も含めたユーザーの入力メッセージ 
 # base64_image: スクショ画像をbase64エンコードしたもの
 # max_tokens: 生成するテキストの最大トークン数
-def chatapi(input_messages, base64_image = None, max_tokens = 300):
+def chatapi(input_messages, language, base64_image = None, max_tokens = 300):
     # テスト用
     print("バックエンドで受け取ったinput_messages:", input_messages)
     
-    system_messages = [
-    {
-        "role": "user",
-        "content": "ユーザーが画面情報を参照して言っているなら、「code101」というメッセージのみ返してください。"
-    },
-    {
-        "role": "user",
-        "content": (
-            "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。"
-            "基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、"
-            "口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「ここからテキスト説明部分に変わります。」"
-            "という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、"
-            "という旨を口頭で説明する部分に入れてください。"
-        )
-    }
-]
+    # 新しいメッセージを先頭に追加
+    if language == "ja-JP":
+        system_messages = [
+            {
+                "role": "user",
+                "content": "ユーザーが画面情報を参照して言っているなら、「code101」というメッセージのみ返してください。"
+            },
+            {
+                "role": "user",
+                "content": (
+                    "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。"
+                    "基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、"
+                    "口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「code102」"
+                    "という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、"
+                    "という旨を口頭で説明する部分に入れてください。"
+                )
+            }
+        ]
+    elif language == "en-US":
+        system_messages = [
+            {
+                "role": "user",
+                "content": "If you are referring to the screen information, please return only the message 'code101'."
+            },
+            {
+                "role": "user",
+                "content": (
+                    "You are an excellent AI assistant. Please answer as concisely, clearly, and accurately as possible."
+                    "Basically, I want you to explain orally, but if there is content that should be displayed in text (such as source code),"
+                    "please divide the content into parts that you want to explain orally and parts that you want to explain in text," 
+                    "and use the string 'code102' as a separator. Please answer within ${max_tokens} tokens."
+                    "Also, please include the part where you want to explain in text, saying that you will explain in text."
+                )
+            }
+        ]
+    else:
+        print("言語が不正です。")
+        return
+    
     input_messages = system_messages + input_messages
     
     # OpenAI APIのクライアントを作成する.

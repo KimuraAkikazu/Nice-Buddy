@@ -1,6 +1,6 @@
 def divide_response(answer: str):
     # 区切り文字列
-    separator = "ここからテキスト説明部分に変わります。"
+    separator = "code102"
 
     # 区切り文字で分割
     if separator in answer:

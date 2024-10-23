@@ -42,6 +42,7 @@ class Message(BaseModel):
 # ChatRequestモデル
 class ChatRequest(BaseModel):
     input_messages: List[Message]
+    language: str
     base64_image: Optional[str] = None
     max_tokens: int = 300
     voicemode: str
@@ -61,6 +62,7 @@ def use_chatapi(request: ChatRequest):
         # リクエストボディから値を取得してchatapiに渡す
         response = chatapi(
             input_messages=request.input_messages, 
+            language=request.language,
             base64_image=request.base64_image, 
             max_tokens=request.max_tokens
         )

@@ -174,9 +174,6 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                     <Button variant='contained' sx={{ width: '140px'}}>
                         会話を中断
                     </Button>
-                    <Button variant='contained' sx={{ width: '140px'}}>
-                        指定ウインドウのスクショ
-                    </Button>
                     <TextField id='outlined-basic' label='最大トークン数' variant='outlined' type='number' value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} sx={{ margin: '16px', width: '128px' }} />
                     <VoiceSelector callbackVoicemode={handleVoicemodeChange} />
                 </Box>

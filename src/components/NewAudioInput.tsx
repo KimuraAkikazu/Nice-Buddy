@@ -3,6 +3,8 @@ import { Box, Button, keyframes, TextField } from '@mui/material';
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import Endpoints from '../config/Endpoints';
+import LanguageSelectionButton from './LanguageSelectionButton';
+import VoiceSelector from './VoiceSelector';
 
 interface AudioInputProps {
     callbackUploadResult: (speechScript: string, message: string) => void; // chatapiの結果を渡すコールバック
@@ -17,14 +19,16 @@ type Message = {
 const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
     const [maxTokens, setMaxTokens] = useState<number>(500);
+    const [voicemode, setVoicemode] = useState<string>('alloy');
     const audioRef = useRef<HTMLAudioElement | null>(null); // 音声再生用のref
+    const [language, setLanguage] = useState('ja-JP');
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
     const MAX_MESSAGE_LENGTH = 10;
 
     const handleStartListening = () => {
         resetTranscript();
-        SpeechRecognition.startListening({ continuous: false, language: 'ja-JP' });
+        SpeechRecognition.startListening({ continuous: false, language: language });
     };
 
     const handleStopListening = () => {
@@ -34,6 +38,10 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         if (transcript) {
             uploadData(transcript);
         }
+    };
+
+    const handleVoicemodeChange = (voicemode: string) => {
+        setVoicemode(voicemode);
     };
 
     // 音声認識が停止したら自動的に結果を処理
@@ -69,8 +77,10 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    input_messages: chat_converted,     // 必須
-                    max_tokens: maxTokens            // 必須
+                    input_messages: chat_converted, // 必須
+                    language: language, // 必須
+                    max_tokens: maxTokens, // 必須
+                    voicemode: voicemode // 必須
                 }),
             });
 
@@ -108,6 +118,11 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         // 音声再生終了後に次の音声入力を自動で開始
         audio.onended = handleStartListening;
     };
+
+    const handleLanguageChange = (newLanguage: string) => {
+        setLanguage(newLanguage);
+        console.log('Language changed to:', newLanguage);
+    }
 
     // グラデーションアニメーションの定義
     const gradientAnimation = keyframes`
@@ -155,13 +170,12 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 </Button>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }
                 }>
+                    <LanguageSelectionButton callbackLanguage={handleLanguageChange} />
                     <Button variant='contained' sx={{ width: '140px'}}>
                         会話を中断
                     </Button>
-                    <Button variant='contained' sx={{ width: '140px'}}>
-                        指定ウインドウのスクショ
-                    </Button>
                     <TextField id='outlined-basic' label='最大トークン数' variant='outlined' type='number' value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} sx={{ margin: '16px', width: '128px' }} />
+                    <VoiceSelector callbackVoicemode={handleVoicemodeChange} />
                 </Box>
             </Box>
             <Box sx={{

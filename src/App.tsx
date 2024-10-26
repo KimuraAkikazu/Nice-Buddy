@@ -2,7 +2,7 @@ import './App.css'
 import { useState } from 'react';
 import { Box } from '@mui/material'
 import ChatBox from './components/ChatBox';
-import Description from './components/Description'
+// import Description from './components/Description'
 import Title from './components/Title'
 import NewAudioInput from './components/NewAudioInput';
 
@@ -11,10 +11,10 @@ function App() {
   const title = "教えてずんだもん";
 
   // 説明文の内容
-  const description = [
-    `ずんだもんが会話形式で質問に答えるアプリです。`,
-    ``,
-  ];
+  // const description = [
+  //   `ずんだもんが会話形式で質問に答えるアプリです。`,
+  //   ``,
+  // ];
 
   // chatをstateとして管理
   const [chat, setChat] = useState<string[][]>([
@@ -56,7 +56,7 @@ function App() {
   return (
     <Box>
       <Title title={title} />
-      <Description description={description} />
+      {/* <Description description={description} /> */}
       {/* <UploadDataButton callbackUploadResult={handleUploadResult} chat={chat} /> */}
       <NewAudioInput callbackUploadResult={handleUploadResult} chat={chat} />
       <ChatBox chat={chat} />

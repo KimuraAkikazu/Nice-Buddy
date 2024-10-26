@@ -47,7 +47,10 @@ export default function ChatBox({ chat }: { chat: string[][] }) {
                             ? '15px 15px 0 15px' 
                             : '15px 15px 15px 0', // 吹き出しの形状を変える
                         maxWidth: '80%', // 幅を制限
-                        wordWrap: 'break-word',
+                        wordWrap: 'break-word', // 長い単語を折り返し
+                        wordBreak: 'break-word', // 折り返し処理
+                        overflowWrap: 'break-word', // テキストのはみ出し防止
+                        overflow: 'auto', // はみ出し防止のため
                         boxShadow: '0px 1px 3px rgba(0,0,0,0.1)',
                     }}
                 >

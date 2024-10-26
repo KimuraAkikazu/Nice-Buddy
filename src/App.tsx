@@ -17,8 +17,6 @@ function App() {
     // chatAPIの回答をchatに追加
     if(speechScript) setChat((prevChat) => [...prevChat, ['assistant', speechScript]]);
     if(answer) setChat((prevChat) => [...prevChat, ['assistant', answer]]);
-    // Base64エンコードされたMP3を再生する処理
-    // playAudioFromBase64(speechBase64);
   };
 
   return (

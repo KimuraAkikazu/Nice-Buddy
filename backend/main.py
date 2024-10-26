@@ -11,6 +11,7 @@ from chatapi import chatapi
 from devide_response import divide_response
 from text_to_speech_base64 import text_to_speech_base64
 
+from models import TextContent, ImageUrl, ImageContent, Message, ChatRequest
 
 app = FastAPI()
 
@@ -21,31 +22,31 @@ app.add_middleware(
     allow_headers=["*"]       # 追記により追加
 )
 
-# TextContentモデル
-class TextContent(BaseModel):
-    type: str = "text"
-    text: str
+# # TextContentモデル
+# class TextContent(BaseModel):
+#     type: str = "text"
+#     text: str
 
-# ImageContentモデル
-class ImageUrl(BaseModel):
-    url: str
+# # ImageContentモデル
+# class ImageUrl(BaseModel):
+#     url: str
 
-class ImageContent(BaseModel):
-    type: str = "image_url"
-    image_url: ImageUrl
+# class ImageContent(BaseModel):
+#     type: str = "image_url"
+#     image_url: ImageUrl
 
-# MessageモデルでUnionを使用してリストの要素に対応
-class Message(BaseModel):
-    role: str
-    content: Union[str, List[Union[TextContent, ImageContent]]]
+# # MessageモデルでUnionを使用してリストの要素に対応
+# class Message(BaseModel):
+#     role: str
+#     content: Union[str, List[Union[TextContent, ImageContent]]]
 
-# ChatRequestモデル
-class ChatRequest(BaseModel):
-    input_messages: List[Message]
-    language: str
-    base64_image: Optional[str] = None
-    max_tokens: int = 300
-    voicemode: str
+# # ChatRequestモデル
+# class ChatRequest(BaseModel):
+#     input_messages: List[Message]
+#     language: str
+#     base64_image: Optional[str] = None
+#     max_tokens: int = 300
+#     voicemode: str
     
 @app.exception_handler(RequestValidationError)
 async def handler(request:Request, exc:RequestValidationError):
@@ -69,8 +70,8 @@ def use_chatapi(request: ChatRequest):
         # スピーチ部分とテキスト部分を分ける処理を追加
         answer = response.choices[0].message.content
         speech_part, text_part = divide_response(answer)
-        print("speech_part:", speech_part)
-        print("text_part:", text_part)
+        # print("speech_part:", speech_part)
+        # print("text_part:", text_part)
         
         # text-to-speechの処理を追加
         speech_part_base64 = text_to_speech_base64(speech_part, voice=request.voicemode)

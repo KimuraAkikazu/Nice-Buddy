@@ -8,7 +8,7 @@ import NewAudioInput from './components/NewAudioInput';
 
 function App() {
   // タイトルの内容
-  const title = "教えてずんだもん";
+  const title = "NICE BUDDY";
 
   // 説明文の内容
   // const description = [

@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import os
 from take_screenshot import screenshot
+from typing import List
+from models import TextContent, ImageUrl, ImageContent, Message
 
 load_dotenv()
 
@@ -20,8 +22,9 @@ def transform_content_for_image(base64_image, messages):
     
     # 元のcontentの値を取得
     original_content = last_message.content
-    
-    # 新しいcontentの構造
+
+    # 新しいcontentをPydanticモデルで作成
+    # まだ警告出る。後で直す
     new_content = [
         {
             "type": "text",
@@ -61,16 +64,15 @@ def chatapi(input_messages, language, base64_image = None, max_tokens = 300):
         system_messages = [
             {
                 "role": "user",
-                "content": "ユーザーが画面情報を参照して言っているなら、「code101」というメッセージのみ返してください。"
+                "content": "ユーザーが画面情報を参照して言ってそうなら、「code101」というメッセージのみ返してください。ただし、むやみやたらに「code101」と返すのはやめてください。"
             },
             {
                 "role": "user",
                 "content": (
                     "あなたは優秀なAIアシスタントです。できるだけ簡潔に、わかりやすく、正確に回答してください。"
-                    "基本的に回答は口頭で説明してほしいのですが、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、"
-                    "口頭で説明したい部分とテキストで説明したい部分に分けて、その区切りは「code102」"
-                    "という文字列で行ってください。${max_tokens}トークン以内で回答してください。また、テキストで説明するよ、"
-                    "という旨を口頭で説明する部分に入れてください。"
+                    "基本的に回答は口頭で、30~50文字程度で説明してください。しかし、もしテキストで表示したほうが良いような内容（ソースコードなど）がある場合は、"
+                    "前半を口頭で説明したい部分、後半をテキストで説明したい部分というように分けて、その区切りは「code102」"
+                    "という文字列で行ってください。${max_tokens}トークン以内で回答してください。"
                 )
             }
         ]
@@ -105,7 +107,7 @@ def chatapi(input_messages, language, base64_image = None, max_tokens = 300):
     if (base64_image == None):
         # テキストのみの場合
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=input_messages,
             max_tokens=max_tokens,
         )
@@ -116,7 +118,7 @@ def chatapi(input_messages, language, base64_image = None, max_tokens = 300):
             screenshot_base64 = screenshot()
             input_messages = transform_content_for_image(screenshot_base64, input_messages)
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=input_messages,
                 max_tokens=max_tokens,
             )   
@@ -126,39 +128,39 @@ def chatapi(input_messages, language, base64_image = None, max_tokens = 300):
         input_messages = transform_content_for_image(base64_image, input_messages)
         
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=input_messages,
             max_tokens=max_tokens,
         )
     
-    # print(response)
+    print(response.choices[0].message.content)
     return response
 
-def main():
-    # 画像のパス
-    image_path = "image/codeimage.png"
+# def main():
+#     # 画像のパス
+#     image_path = "image/codeimage.png"
 
-    # 画像をbase64にエンコードする
-    base64_image = encode_image(image_path)
+#     # 画像をbase64にエンコードする
+#     base64_image = encode_image(image_path)
 
-    # チャットの応答を生成する
-    response = chatapi("この画面の下の方に映っているエラーの原因を教えて下さい。", base64_image, 1000)
-    answer = response.choices[0].message.content
-    print(answer)
+#     # チャットの応答を生成する
+#     response = chatapi("この画面の下の方に映っているエラーの原因を教えて下さい。", base64_image, 1000)
+#     answer = response.choices[0].message.content
+#     print(answer)
 
-    # 区切り文字列
-    separator = "ここからテキスト説明部分に変わります"
+#     # 区切り文字列
+#     separator = "ここからテキスト説明部分に変わります"
 
-    # 区切り文字で分割
-    if separator in answer:
-        speech_part, text_part = answer.split(separator, 1)
-    else:
-        speech_part, text_part = answer, ""  # 区切りがない場合
+#     # 区切り文字で分割
+#     if separator in answer:
+#         speech_part, text_part = answer.split(separator, 1)
+#     else:
+#         speech_part, text_part = answer, ""  # 区切りがない場合
         
-    print("Speech Part:")
-    print(speech_part.strip())  # 前後の空白を削除して整形
-    print("\nText Part:")
-    print(text_part.strip())
+#     print("Speech Part:")
+#     print(speech_part.strip())  # 前後の空白を削除して整形
+#     print("\nText Part:")
+#     print(text_part.strip())
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

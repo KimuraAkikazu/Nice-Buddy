@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Button, keyframes, TextField } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, keyframes } from '@mui/material';
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import Endpoints from '../config/Endpoints';
@@ -20,7 +20,8 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
     const [maxTokens, setMaxTokens] = useState<number>(500);
     const [voicemode, setVoicemode] = useState<string>('alloy');
-    const audioRef = useRef<HTMLAudioElement | null>(null); // 音声再生用のref
+    const [openDialog, setOpenDialog] = useState(false); // ダイアログの開閉状態
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const [language, setLanguage] = useState('ja-JP');
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
@@ -28,7 +29,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
     const handleStartListening = () => {
         resetTranscript();
-        SpeechRecognition.startListening({ continuous: false, language: language });
+        SpeechRecognition.startListening({ continuous: false, language });
     };
 
     const handleStopListening = () => {
@@ -40,11 +41,6 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         }
     };
 
-    const handleVoicemodeChange = (voicemode: string) => {
-        setVoicemode(voicemode);
-    };
-
-    // 音声認識が停止したら自動的に結果を処理
     useEffect(() => {
         if (!listening) {
             handleStopListening();
@@ -73,14 +69,12 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
             // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
             const response = await fetch(Endpoints.ChatApiUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    input_messages: chat_converted, // 必須
-                    language: language, // 必須
-                    max_tokens: maxTokens, // 必須
-                    voicemode: voicemode // 必須
+                    input_messages: chat_converted,
+                    language,
+                    max_tokens: maxTokens,
+                    voicemode,
                 }),
             });
 
@@ -88,13 +82,13 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 console.error('APIの呼び出しに失敗しました:', response.status);
                 return;
             }
+
             const data = await response.json();
             console.log('APIの呼び出しに成功しました:', data);
 
             const { speech_part_script: speechPartScript, speech_part_base64: speechPartBase64, text_part: textPart } = data;
             callbackUploadResult(speechPartScript, textPart); // 親コンポーネントに回答を渡す
             playAudioFromBase64(speechPartBase64.trim());
-
         } catch (error) {
             console.error('APIの呼び出し中にエラーが発生しました:', error);
         }
@@ -126,20 +120,13 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
     // グラデーションアニメーションの定義
     const gradientAnimation = keyframes`
-        0% {
-            background-position: 0% 50%;
-        }
-        50% {
-            background-position: 100% 50%;
-        }
-        100% {
-            background-position: 0% 50%;
-        }
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     `;
 
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '16px'}}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                 <Button
                     onClick={listening ? handleStopListening : handleStartListening}
                     sx={{
@@ -168,29 +155,40 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 >
                     {listening ? 'Listening...' : 'Click to Start'}
                 </Button>
-                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '8px' }
-                }>
-                    <LanguageSelectionButton callbackLanguage={handleLanguageChange} />
-                    <Button variant='contained' sx={{ width: '140px'}}>
-                        会話を中断
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
+                    <Button variant="contained" onClick={() => setOpenDialog(true)}>
+                        設定
                     </Button>
-                    <TextField id='outlined-basic' label='最大トークン数' variant='outlined' type='number' value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} sx={{ margin: '16px', width: '128px' }} />
-                    <VoiceSelector callbackVoicemode={handleVoicemodeChange} />
+                    <Button variant='contained'>停止</Button>
                 </Box>
-            </Box>
-            <Box sx={{
-                border: '2px solid #000',
-                borderRadius: '8px',
-                padding: '8px',
-                width: '70%',
-                minHeight: '30px',
-                alignContent: 'center',
-            }}>
-                <Box sx={{ fontSize: '16px' }}>
-                    {transcript}
-                </Box>
-            </Box>
 
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>設定</DialogTitle>
+                <DialogContent
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '24px', // 隙間を広げる
+                        marginTop: '16px'
+                    }}>
+                    <LanguageSelectionButton callbackLanguage={handleLanguageChange} />
+                    <TextField
+                        label="最大トークン数"
+                        type="number"
+                        value={maxTokens}
+                        onChange={e => setMaxTokens(Number(e.target.value))}
+                        sx={{ marginTop: '16px', width: '100%' }}
+                    />
+                    <VoiceSelector callbackVoicemode={setVoicemode} />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)}>閉じる</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Box sx={{ border: '2px solid #000', borderRadius: '8px', padding: '8px', width: '70%', minHeight: '30px' }}>
+                <Box sx={{ fontSize: '16px' }}>{transcript}</Box>
+            </Box>
         </Box>
     );
 };

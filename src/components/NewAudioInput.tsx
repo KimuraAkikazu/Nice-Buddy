@@ -5,16 +5,12 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 import Endpoints from '../config/Endpoints';
 import LanguageSelectionButton from './LanguageSelectionButton';
 import VoiceSelector from './VoiceSelector';
+import { Message } from '../config/Interfaces';
 
 interface AudioInputProps {
-    callbackUploadResult: (speechScript: string, message: string) => void; // chatapiの結果を渡すコールバック
-    chat: string[][];
+    callbackUploadResult: (speechScript: string, textPart: string) => void; // chatapiの結果を渡すコールバック
+    chat: Message[]; // チャットデータ
 }
-
-type Message = {
-    role: string;
-    content: string;
-};
 
 const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
@@ -47,24 +43,22 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         }
     }, [listening]);
 
-    // チャットデータをAPIに送信する形式に変換する関数
-    const convertToMessageObjects = (input: string[][]): Message[] => {
-        // chatの要素数が10を超えた場合、最後の10個だけ取得
-        const lastTenChats = input.length > MAX_MESSAGE_LENGTH ? input.slice(-MAX_MESSAGE_LENGTH) : input;
-
-        return lastTenChats
-            .filter(arr => arr.length === 2) // 要素数が2のものだけをフィルタリング
-            .map(([role, content]) => ({ role, content }));
+    // 直近のn件のチャットデータを取得する関数
+    const convertToMessageObjects = (chat: Message[], n: number) => {
+        if (chat.length < n) {
+            return chat.map((message) => ({ role: message.role, content: message.content }));
+        }else{
+            return chat.slice(chat.length - n).map((message) => ({ role: message.role, content: message.content }));
+        }
     };
 
     // APIに音声ファイルと画像を送信する関数
     const uploadData = async (recognizedText: string) => {
         try {
-            chat.push(['user', recognizedText || '']); // チャットデータに音声認識結果を追加
+            chat.push({ role: 'user', content: recognizedText, contentType: 'text' });
 
-            // チャットデータをAPIに送信する形式に変換
-            const chat_converted = convertToMessageObjects(chat);
-            console.log('chat_converted:', chat_converted);
+            // 最新のn件のチャットデータを取得
+            const chat_converted = convertToMessageObjects(chat, MAX_MESSAGE_LENGTH);
 
             // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
             const response = await fetch(Endpoints.ChatApiUrl, {
@@ -186,9 +180,9 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 </DialogActions>
             </Dialog>
 
-            <Box sx={{ border: '2px solid #000', borderRadius: '8px', padding: '8px', width: '70%', minHeight: '30px' }}>
+            {/* <Box sx={{ border: '2px solid #000', borderRadius: '8px', padding: '8px', width: '70%', minHeight: '30px' }}>
                 <Box sx={{ fontSize: '16px' }}>{transcript}</Box>
-            </Box>
+            </Box> */}
         </Box>
     );
 };

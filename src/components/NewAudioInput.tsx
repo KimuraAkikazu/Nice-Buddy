@@ -19,21 +19,31 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const [openDialog, setOpenDialog] = useState(false); // ダイアログの開閉状態
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [language, setLanguage] = useState('ja-JP');
+    const [shouldProcessTranscript, setShouldProcessTranscript] = useState(true); // 追加
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
     const MAX_MESSAGE_LENGTH = 10;
 
     const handleStartListening = () => {
         resetTranscript();
+        setShouldProcessTranscript(true); // 追加
         SpeechRecognition.startListening({ continuous: false, language });
     };
 
     const handleStopListening = () => {
-        SpeechRecognition.stopListening();
-
-        //transcriptが空でない場合、音声認識結果をAPIに送信
-        if (transcript) {
+        // SpeechRecognition.stopListening(); // この行は削除またはコメントアウト
+        if (shouldProcessTranscript && transcript) { // 修正
             uploadData(transcript);
+        }
+    };
+
+    const handleStop = () => {
+        setShouldProcessTranscript(false); // 追加
+        SpeechRecognition.stopListening();
+        resetTranscript();
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
         }
     };
 
@@ -47,7 +57,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const convertToMessageObjects = (chat: Message[], n: number) => {
         if (chat.length < n) {
             return chat.map((message) => ({ role: message.role, content: message.content }));
-        }else{
+        } else {
             return chat.slice(chat.length - n).map((message) => ({ role: message.role, content: message.content }));
         }
     };
@@ -60,7 +70,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
             // 最新のn件のチャットデータを取得
             const chat_converted = convertToMessageObjects(chat, MAX_MESSAGE_LENGTH);
 
-            // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
+            // APIにPOSTリクエストを送る
             const response = await fetch(Endpoints.ChatApiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -110,7 +120,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const handleLanguageChange = (newLanguage: string) => {
         setLanguage(newLanguage);
         console.log('Language changed to:', newLanguage);
-    }
+    };
 
     // グラデーションアニメーションの定義
     const gradientAnimation = keyframes`
@@ -121,40 +131,40 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                <Button
-                    onClick={listening ? handleStopListening : handleStartListening}
-                    sx={{
-                        width: '150px',
-                        height: '150px',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        fontSize: '16px',
-                        color: 'white',
-                        backgroundColor: listening ? 'transparent' : '#ccc',
-                        transition: 'background-color 0.3s ease',
+            <Button
+                onClick={listening ? handleStopListening : handleStartListening}
+                sx={{
+                    width: '150px',
+                    height: '150px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontSize: '16px',
+                    color: 'white',
+                    backgroundColor: listening ? 'transparent' : '#ccc',
+                    transition: 'background-color 0.3s ease',
+                    outline: 'none',
+                    boxShadow: 'none',
+                    '&:focus': {
                         outline: 'none',
-                        boxShadow: 'none',
-                        '&:focus': {
-                            outline: 'none',
-                            boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
-                        },
-                        ...(listening && {
-                            background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
-                            backgroundSize: '400% 400%',
-                            animation: `${gradientAnimation} 3s ease infinite`,
-                        }),
-                    }}
-                >
-                    {listening ? 'Listening...' : 'Click to Start'}
+                        boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
+                    },
+                    ...(listening && {
+                        background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
+                        backgroundSize: '400% 400%',
+                        animation: `${gradientAnimation} 3s ease infinite`,
+                    }),
+                }}
+            >
+                {listening ? 'Listening...' : 'Click to Start'}
+            </Button>
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
+                <Button variant="contained" onClick={() => setOpenDialog(true)}>
+                    設定
                 </Button>
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
-                    <Button variant="contained" onClick={() => setOpenDialog(true)}>
-                        設定
-                    </Button>
-                    <Button variant='contained'>停止</Button>
-                </Box>
+                <Button variant='contained' onClick={handleStop}>停止</Button> {/* 修正箇所 */}
+            </Box>
 
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                 <DialogTitle>設定</DialogTitle>

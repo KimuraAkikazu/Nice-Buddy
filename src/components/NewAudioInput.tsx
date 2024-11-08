@@ -82,7 +82,9 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
             const { speech_part_script: speechPartScript, speech_part_base64: speechPartBase64, text_part: textPart } = data;
             callbackUploadResult(speechPartScript, textPart); // 親コンポーネントに回答を渡す
-            playAudioFromBase64(speechPartBase64.trim());
+            if (speechPartBase64){
+                playAudioFromBase64(speechPartBase64.trim());
+            }
         } catch (error) {
             console.error('APIの呼び出し中にエラーが発生しました:', error);
         }

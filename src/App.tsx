@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Box, Modal, Typography, Button } from '@mui/material';
 import { Message } from './config/Interfaces';
 import NewAudioInput from './components/NewAudioInput';
@@ -20,8 +20,16 @@ function App() {
     }
   };
 
+  type CodeProps = {
+    node?: any;
+    inline?: boolean;
+    className?: string;
+    children?: ReactNode;
+    [key: string]: any;
+  };
+  
   const components = {
-    code({ node, inline, className, children, ...props }) {
+    code({ node, inline, className, children, ...props }: CodeProps) {
       const match = /language-(\w+)/.exec(className || '');
       return !inline && match ? (
         <SyntaxHighlighter

@@ -5,16 +5,12 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 import Endpoints from '../config/Endpoints';
 import LanguageSelectionButton from './LanguageSelectionButton';
 import VoiceSelector from './VoiceSelector';
+import { Message } from '../config/Interfaces';
 
 interface AudioInputProps {
-    callbackUploadResult: (speechScript: string, message: string) => void; // chatapiの結果を渡すコールバック
-    chat: string[][];
+    callbackUploadResult: (speechScript: string, textPart: string) => void; // chatapiの結果を渡すコールバック
+    chat: Message[]; // チャットデータ
 }
-
-type Message = {
-    role: string;
-    content: string;
-};
 
 const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }) => {
     const { transcript, resetTranscript, listening } = useSpeechRecognition();
@@ -23,21 +19,31 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const [openDialog, setOpenDialog] = useState(false); // ダイアログの開閉状態
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [language, setLanguage] = useState('ja-JP');
+    const [shouldProcessTranscript, setShouldProcessTranscript] = useState(true); // 追加
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
     const MAX_MESSAGE_LENGTH = 10;
 
     const handleStartListening = () => {
         resetTranscript();
+        setShouldProcessTranscript(true); // 追加
         SpeechRecognition.startListening({ continuous: false, language });
     };
 
     const handleStopListening = () => {
-        SpeechRecognition.stopListening();
-
-        //transcriptが空でない場合、音声認識結果をAPIに送信
-        if (transcript) {
+        // SpeechRecognition.stopListening(); // この行は削除またはコメントアウト
+        if (shouldProcessTranscript && transcript) { // 修正
             uploadData(transcript);
+        }
+    };
+
+    const handleStop = () => {
+        setShouldProcessTranscript(false); // 追加
+        SpeechRecognition.stopListening();
+        resetTranscript();
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
         }
     };
 
@@ -47,26 +53,24 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         }
     }, [listening]);
 
-    // チャットデータをAPIに送信する形式に変換する関数
-    const convertToMessageObjects = (input: string[][]): Message[] => {
-        // chatの要素数が10を超えた場合、最後の10個だけ取得
-        const lastTenChats = input.length > MAX_MESSAGE_LENGTH ? input.slice(-MAX_MESSAGE_LENGTH) : input;
-
-        return lastTenChats
-            .filter(arr => arr.length === 2) // 要素数が2のものだけをフィルタリング
-            .map(([role, content]) => ({ role, content }));
+    // 直近のn件のチャットデータを取得する関数
+    const convertToMessageObjects = (chat: Message[], n: number) => {
+        if (chat.length < n) {
+            return chat.map((message) => ({ role: message.role, content: message.content }));
+        } else {
+            return chat.slice(chat.length - n).map((message) => ({ role: message.role, content: message.content }));
+        }
     };
 
     // APIに音声ファイルと画像を送信する関数
     const uploadData = async (recognizedText: string) => {
         try {
-            chat.push(['user', recognizedText || '']); // チャットデータに音声認識結果を追加
+            chat.push({ role: 'user', content: recognizedText, contentType: 'text' });
 
-            // チャットデータをAPIに送信する形式に変換
-            const chat_converted = convertToMessageObjects(chat);
-            console.log('chat_converted:', chat_converted);
+            // 最新のn件のチャットデータを取得
+            const chat_converted = convertToMessageObjects(chat, MAX_MESSAGE_LENGTH);
 
-            // APIにPOSTリクエストを送る（URLはAPIのエンドポイントに置き換えてください）
+            // APIにPOSTリクエストを送る
             const response = await fetch(Endpoints.ChatApiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -88,7 +92,9 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
             const { speech_part_script: speechPartScript, speech_part_base64: speechPartBase64, text_part: textPart } = data;
             callbackUploadResult(speechPartScript, textPart); // 親コンポーネントに回答を渡す
-            playAudioFromBase64(speechPartBase64.trim());
+            if (speechPartBase64){
+                playAudioFromBase64(speechPartBase64.trim());
+            }
         } catch (error) {
             console.error('APIの呼び出し中にエラーが発生しました:', error);
         }
@@ -116,7 +122,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const handleLanguageChange = (newLanguage: string) => {
         setLanguage(newLanguage);
         console.log('Language changed to:', newLanguage);
-    }
+    };
 
     // グラデーションアニメーションの定義
     const gradientAnimation = keyframes`
@@ -127,40 +133,40 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                <Button
-                    onClick={listening ? handleStopListening : handleStartListening}
-                    sx={{
-                        width: '150px',
-                        height: '150px',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        fontSize: '16px',
-                        color: 'white',
-                        backgroundColor: listening ? 'transparent' : '#ccc',
-                        transition: 'background-color 0.3s ease',
+            <Button
+                onClick={listening ? handleStopListening : handleStartListening}
+                sx={{
+                    width: '150px',
+                    height: '150px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontSize: '16px',
+                    color: 'white',
+                    backgroundColor: listening ? 'transparent' : '#ccc',
+                    transition: 'background-color 0.3s ease',
+                    outline: 'none',
+                    boxShadow: 'none',
+                    '&:focus': {
                         outline: 'none',
-                        boxShadow: 'none',
-                        '&:focus': {
-                            outline: 'none',
-                            boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
-                        },
-                        ...(listening && {
-                            background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
-                            backgroundSize: '400% 400%',
-                            animation: `${gradientAnimation} 3s ease infinite`,
-                        }),
-                    }}
-                >
-                    {listening ? 'Listening...' : 'Click to Start'}
+                        boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
+                    },
+                    ...(listening && {
+                        background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
+                        backgroundSize: '400% 400%',
+                        animation: `${gradientAnimation} 3s ease infinite`,
+                    }),
+                }}
+            >
+                {listening ? 'Listening...' : 'Click to Start'}
+            </Button>
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
+                <Button variant="contained" onClick={() => setOpenDialog(true)}>
+                    設定
                 </Button>
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
-                    <Button variant="contained" onClick={() => setOpenDialog(true)}>
-                        設定
-                    </Button>
-                    <Button variant='contained'>停止</Button>
-                </Box>
+                <Button variant='contained' onClick={handleStop}>停止</Button> {/* 修正箇所 */}
+            </Box>
 
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                 <DialogTitle>設定</DialogTitle>
@@ -186,9 +192,9 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                 </DialogActions>
             </Dialog>
 
-            <Box sx={{ border: '2px solid #000', borderRadius: '8px', padding: '8px', width: '70%', minHeight: '30px' }}>
+            {/* <Box sx={{ border: '2px solid #000', borderRadius: '8px', padding: '8px', width: '70%', minHeight: '30px' }}>
                 <Box sx={{ fontSize: '16px' }}>{transcript}</Box>
-            </Box>
+            </Box> */}
         </Box>
     );
 };

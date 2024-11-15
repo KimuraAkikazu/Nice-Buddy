@@ -10,6 +10,7 @@ from traceback import format_exc
 from chatapi import chatapi
 from devide_response import divide_response
 from text_to_speech_base64 import text_to_speech_base64
+from take_selectedarea_screenshot import selected_area_screenshot
 
 from models import TextContent, ImageUrl, ImageContent, Message, ChatRequest
 
@@ -21,32 +22,6 @@ app.add_middleware(
     allow_methods=["*"],      # 追記により追加
     allow_headers=["*"]       # 追記により追加
 )
-
-# # TextContentモデル
-# class TextContent(BaseModel):
-#     type: str = "text"
-#     text: str
-
-# # ImageContentモデル
-# class ImageUrl(BaseModel):
-#     url: str
-
-# class ImageContent(BaseModel):
-#     type: str = "image_url"
-#     image_url: ImageUrl
-
-# # MessageモデルでUnionを使用してリストの要素に対応
-# class Message(BaseModel):
-#     role: str
-#     content: Union[str, List[Union[TextContent, ImageContent]]]
-
-# # ChatRequestモデル
-# class ChatRequest(BaseModel):
-#     input_messages: List[Message]
-#     language: str
-#     base64_image: Optional[str] = None
-#     max_tokens: int = 300
-#     voicemode: str
     
 @app.exception_handler(RequestValidationError)
 async def handler(request:Request, exc:RequestValidationError):
@@ -81,5 +56,20 @@ def use_chatapi(request: ChatRequest):
         return {"text_part": text_part, "speech_part_script": speech_part, "speech_part_base64": speech_part_base64}
     except Exception as e:
         error_message = format_exc()  # 詳細なスタックトレースを取得
+        print(f"Error occurred: {error_message}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/screenshot")
+def use_screenshot():
+    try:
+        # リクエストの座標を取得
+        screenshot_base64 = selected_area_screenshot()
+
+        if screenshot_base64 is None:
+            raise HTTPException(status_code=500, detail="Failed to capture screenshot.")
+
+        return {"screenshot_base64": screenshot_base64}
+    except Exception as e:
+        error_message = format_exc()
         print(f"Error occurred: {error_message}")
         raise HTTPException(status_code=500, detail=str(e))

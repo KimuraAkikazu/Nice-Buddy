@@ -6,6 +6,7 @@ import Endpoints from '../config/Endpoints';
 import LanguageSelectionButton from './LanguageSelectionButton';
 import VoiceSelector from './VoiceSelector';
 import { Message } from '../config/Interfaces';
+// import ScreenShotButton from './ScreenShotButton';
 
 interface AudioInputProps {
     callbackUploadResult: (speechScript: string, textPart: string) => void; // chatapiの結果を渡すコールバック
@@ -19,7 +20,8 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
     const [openDialog, setOpenDialog] = useState(false); // ダイアログの開閉状態
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [language, setLanguage] = useState('ja-JP');
-    const [shouldProcessTranscript, setShouldProcessTranscript] = useState(true); // 追加
+    const [shouldProcessTranscript, setShouldProcessTranscript] = useState(true);
+    // const [screenshotBase64, setScreenshotBase64] = useState<string>('');
 
     // チャットデータの最大保持数。最新から何個までchatAPIに送信するか
     const MAX_MESSAGE_LENGTH = 10;
@@ -92,7 +94,7 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
             const { speech_part_script: speechPartScript, speech_part_base64: speechPartBase64, text_part: textPart } = data;
             callbackUploadResult(speechPartScript, textPart); // 親コンポーネントに回答を渡す
-            if (speechPartBase64){
+            if (speechPartBase64) {
                 playAudioFromBase64(speechPartBase64.trim());
             }
         } catch (error) {
@@ -124,6 +126,11 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
         console.log('Language changed to:', newLanguage);
     };
 
+    // const handleScreenshotCapture = (screenshot: string) => {
+    //     console.log('Screenshot captured:', screenshot);
+    //     setScreenshotBase64(screenshot);
+    // }
+
     // グラデーションアニメーションの定義
     const gradientAnimation = keyframes`
         0% { background-position: 0% 50%; }
@@ -133,38 +140,48 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', margin: '32px 0', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-            <Button
-                onClick={listening ? handleStopListening : handleStartListening}
-                sx={{
-                    width: '150px',
-                    height: '150px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontSize: '16px',
-                    color: 'white',
-                    backgroundColor: listening ? 'transparent' : '#ccc',
-                    transition: 'background-color 0.3s ease',
-                    outline: 'none',
-                    boxShadow: 'none',
-                    '&:focus': {
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
+                <Button
+                    onClick={listening ? handleStopListening : handleStartListening}
+                    sx={{
+                        width: '150px',
+                        height: '150px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        fontSize: '16px',
+                        color: 'white',
+                        backgroundColor: listening ? 'transparent' : '#ccc',
+                        transition: 'background-color 0.3s ease',
                         outline: 'none',
-                        boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
-                    },
-                    ...(listening && {
-                        background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
-                        backgroundSize: '400% 400%',
-                        animation: `${gradientAnimation} 3s ease infinite`,
-                    }),
-                }}
-            >
-                {listening ? 'Listening...' : 'Click to Start'}
-            </Button>
+                        boxShadow: 'none',
+                        '&:focus': {
+                            outline: 'none',
+                            boxShadow: '0 0 0 4px rgba(82, 243, 196, 0.5)',
+                        },
+                        ...(listening && {
+                            background: 'linear-gradient(270deg, #ff6ec4, #7873f5, #52f3c4)',
+                            backgroundSize: '400% 400%',
+                            animation: `${gradientAnimation} 3s ease infinite`,
+                        }),
+                    }}
+                >
+                    {listening ? 'Listening...' : 'Click to Start'}
+                </Button>
+                {/* <Box>
+                    {screenshotBase64 && (
+                        <Box sx={{ marginTop: '20px' }}>
+                            <img src={`data:image/png;base64,${screenshotBase64}`} alt="Screenshot" style={{ maxWidth: '100%', height: 'auto' }} />
+                        </Box>
+                    )}
+                </Box> */}
+            </Box>
             <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px', justifyContent: 'center' }}>
                 <Button variant="contained" onClick={() => setOpenDialog(true)}>
                     設定
                 </Button>
+                {/* <ScreenShotButton onScreenshotCapture={handleScreenshotCapture} />  */}
                 <Button variant='contained' onClick={handleStop}>停止</Button> {/* 修正箇所 */}
             </Box>
 
@@ -191,10 +208,6 @@ const NewAudioInput: React.FC<AudioInputProps> = ({ callbackUploadResult, chat }
                     <Button onClick={() => setOpenDialog(false)}>閉じる</Button>
                 </DialogActions>
             </Dialog>
-
-            {/* <Box sx={{ border: '2px solid #000', borderRadius: '8px', padding: '8px', width: '70%', minHeight: '30px' }}>
-                <Box sx={{ fontSize: '16px' }}>{transcript}</Box>
-            </Box> */}
         </Box>
     );
 };
